@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BENGKEL ELEKTRONIKA — Pertemuan 01 | D3 Teknik Elektro Industri</title>
+<style>
+/* ============================================================
+   BENGKEL ELEKTRONIKA — PERTEMUAN 01
+   Single self-contained file. No external dependency.
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#eef2f7; --card:#ffffff; --ink:#0f172a; --muted:#5b6b82; --line:#dbe3ee;
+  --nav:#0b1424; --nav2:#132441; --navline:#1e3357;
+  --accent:#f59e0b; --accent-d:#b45309; --accent-bg:#fff7e6;
+  --blue:#2563eb; --blue-bg:#e8efff;
+  --ok:#15803d; --ok-bg:#e7f6ed; --ok-line:#86d7a6;
+  --bad:#b91c1c; --bad-bg:#fdecec; --bad-line:#f0a3a3;
+  --radius:14px; --fs:16px;
+  --shadow:0 1px 2px rgba(15,23,42,.06), 0 10px 28px rgba(15,23,42,.07);
+}
+body.projector{--fs:19px}
+html{scroll-behavior:smooth}
+body{
+  margin:0; font-size:var(--fs); line-height:1.6;
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  color:var(--ink); background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{margin:0 0 .5rem; line-height:1.25; letter-spacing:-.01em}
+p{margin:0 0 .75rem}
+a{color:var(--blue)}
+code,.mono{font-family:"Cascadia Mono",Consolas,"Courier New",monospace}
+.wrap{max-width:1180px}
+.muted{color:var(--muted)}
+.small{font-size:.85em}
+.center{text-align:center}
+
+/* ---------- Layout ---------- */
+.app{display:flex; min-height:100vh}
+.sidebar{
+  width:272px; flex:0 0 272px; background:linear-gradient(180deg,var(--nav) 0%,var(--nav2) 100%);
+  color:#e6edf8; position:sticky; top:0; height:100vh; overflow-y:auto;
+  border-right:1px solid var(--navline);
+}
+.brand{display:flex; gap:.7rem; align-items:center; padding:1.1rem 1.1rem .9rem; border-bottom:1px solid var(--navline)}
+.brand .bolt{width:38px;height:38px;flex:0 0 38px;border-radius:10px;background:linear-gradient(145deg,var(--accent),#ea580c);display:grid;place-items:center}
+.brand .bolt svg{width:22px;height:22px}
+.brand b{display:block;font-size:.95rem;letter-spacing:.06em}
+.brand span{display:block;font-size:.72rem;color:#8fa6c6;letter-spacing:.14em}
+.menu{padding:.6rem .6rem 1.4rem}
+.menu h5{margin:.8rem .6rem .4rem;font-size:.66rem;letter-spacing:.18em;color:#7b93b8;font-weight:700}
+.nav-item{
+  display:flex; align-items:center; gap:.65rem; width:100%; text-align:left;
+  padding:.6rem .7rem; margin:.12rem 0; border-radius:10px; border:1px solid transparent;
+  background:transparent; color:#c9d7ea; font:inherit; font-size:.9rem; cursor:pointer;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.nav-item:hover{background:rgba(255,255,255,.07); color:#fff}
+.nav-item.active{background:linear-gradient(90deg,rgba(245,158,11,.22),rgba(245,158,11,.05)); color:#fff; border-color:rgba(245,158,11,.45)}
+.nav-item .num{width:24px;height:24px;flex:0 0 24px;border-radius:7px;background:rgba(255,255,255,.09);display:grid;place-items:center;font-size:.72rem;font-weight:700}
+.nav-item.active .num{background:var(--accent);color:#2b1a00}
+.nav-item.done .num{background:var(--ok);color:#fff}
+.nav-item .lab{flex:1}
+.side-foot{padding:.8rem 1rem 1.4rem; border-top:1px solid var(--navline); font-size:.72rem; color:#7b93b8}
+
+.main{flex:1; min-width:0; display:flex; flex-direction:column}
+.topbar{
+  position:sticky; top:0; z-index:40; background:rgba(255,255,255,.92); backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line); padding:.55rem 1.1rem;
+  display:flex; align-items:center; gap:.8rem; flex-wrap:wrap;
+}
+.tb-title{font-weight:700; font-size:.95rem; letter-spacing:.02em}
+.tb-sub{font-size:.75rem; color:var(--muted)}
+.spacer{flex:1}
+.tb-tools{display:flex; gap:.4rem; align-items:center; flex-wrap:wrap}
+.timer-chip{
+  display:flex; align-items:center; gap:.45rem; background:var(--ink); color:#fff;
+  padding:.3rem .6rem; border-radius:999px; font-family:"Cascadia Mono",Consolas,monospace; font-size:.85rem;
+}
+.timer-chip.warn{background:var(--bad)}
+.btn{
+  border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:9px;
+  padding:.4rem .7rem; font:inherit; font-size:.82rem; cursor:pointer; transition:.15s;
+}
+.btn:hover{border-color:#b9c6d8; background:#f7f9fc}
+.btn.primary{background:var(--blue); border-color:var(--blue); color:#fff}
+.btn.primary:hover{background:var(--blue-d)}
+.btn.amber{background:var(--accent); border-color:var(--accent); color:#33200a; font-weight:600}
+.btn.amber:hover{background:#e58f09}
+.btn.ghost{background:transparent}
+.btn.sm{padding:.25rem .55rem; font-size:.76rem}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+
+.progress-wrap{height:6px;background:#e3e9f2;position:sticky;top:52px;z-index:39}
+.progress-bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#22c55e);transition:width .35s ease}
+.content{padding:1.4rem 1.4rem 3rem; max-width:1180px; width:100%}
+.section{display:none; animation:fade .28s ease}
+.section.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ---------- Cards ---------- */
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:1.1rem 1.2rem; box-shadow:var(--shadow); margin-bottom:1rem}
+.card.tight{padding:.85rem 1rem}
+.grid{display:grid; gap:1rem}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.sec-head{display:flex; align-items:flex-end; gap:1rem; margin-bottom:1rem; flex-wrap:wrap}
+.sec-head .kicker{font-size:.72rem; letter-spacing:.2em; color:var(--accent-d); font-weight:700; text-transform:uppercase}
+.sec-head h2{font-size:1.5rem; margin:0}
+.sec-head .tag{margin-left:auto; font-size:.75rem; color:var(--muted); border:1px solid var(--line); padding:.2rem .55rem; border-radius:999px; background:#fff}
+
+.hero{
+  background:linear-gradient(135deg,#0b1424 0%,#16304f 55%,#1f4d7a 100%); color:#fff;
+  border-radius:18px; padding:1.6rem 1.7rem; box-shadow:var(--shadow); margin-bottom:1rem; position:relative; overflow:hidden;
+}
+.hero::after{content:"";position:absolute;right:-70px;top:-70px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(245,158,11,.35),transparent 65%)}
+.hero h1{font-size:clamp(1.5rem,3.4vw,2.3rem); letter-spacing:.04em}
+.hero h2{color:var(--accent); font-size:clamp(1rem,2vw,1.35rem); font-weight:600; letter-spacing:.02em}
+.hero .sub{color:#bcd2ec; max-width:60ch}
+.hero-meta{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.9rem; position:relative; z-index:2}
+.pill{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); color:#eaf2ff; padding:.28rem .7rem; border-radius:999px; font-size:.78rem}
+.pill.amber{background:var(--accent); color:#33200a; border-color:var(--accent); font-weight:600}
+
+.kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.85rem 1rem}
+.kpi b{display:block;font-size:1.35rem;line-height:1.1}
+.kpi span{font-size:.75rem;color:var(--muted)}
+
+.note{border-left:4px solid var(--accent); background:var(--accent-bg); padding:.7rem .9rem; border-radius:0 10px 10px 0; margin:.6rem 0; font-size:.9rem}
+.note.blue{border-color:var(--blue); background:var(--blue-bg)}
+.note.ok{border-color:var(--ok); background:var(--ok-bg)}
+.note.bad{border-color:var(--bad); background:var(--bad-bg)}
+.note b{display:block; margin-bottom:.15rem}
+.quote{font-size:1.05rem; font-weight:600; color:#123; background:#fff; border:1px dashed #cbd6e6; border-radius:12px; padding:.9rem 1.1rem; text-align:center}
+
+/* ---------- Lists / tables ---------- */
+table{width:100%; border-collapse:collapse; font-size:.9rem; background:#fff; border-radius:10px; overflow:hidden}
+th,td{padding:.55rem .7rem; border-bottom:1px solid var(--line); text-align:left; vertical-align:top}
+th{background:#f3f6fb; font-size:.78rem; letter-spacing:.05em; text-transform:uppercase; color:#3f5573}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:#fafcff}
+ul.clean,ol.clean{margin:.3rem 0 .3rem; padding-left:1.15rem}
+ul.clean li,ol.clean li{margin:.25rem 0}
+ul.tick{list-style:none; padding-left:0}
+ul.tick li{padding-left:1.6rem; position:relative; margin:.3rem 0}
+ul.tick li::before{content:"✓"; position:absolute; left:.35rem; top:0; color:var(--ok); font-weight:700}
+
+/* ---------- Checklist ---------- */
+.check{display:flex; align-items:flex-start; gap:.6rem; padding:.5rem .6rem; border:1px solid var(--line); border-radius:10px; margin:.35rem 0; cursor:pointer; background:#fff; transition:.15s}
+.check:hover{border-color:#b9c6d8; background:#fafcff}
+.check input{margin-top:.25rem; width:17px; height:17px; accent-color:var(--ok); cursor:pointer; flex:0 0 17px}
+.check span{font-size:.9rem}
+.check.done{background:var(--ok-bg); border-color:var(--ok-line)}
+.check.done span{text-decoration:line-through; color:#3d6b51}
+
+/* ---------- Quiz ---------- */
+.q{border:1px solid var(--line); border-radius:12px; padding:.9rem 1rem; margin:.7rem 0; background:#fff}
+.q .qt{font-weight:600; margin-bottom:.55rem; display:flex; gap:.5rem}
+.q .qt .qn{background:var(--ink); color:#fff; border-radius:7px; width:24px; height:24px; flex:0 0 24px; display:grid; place-items:center; font-size:.75rem}
+.opts{display:grid; gap:.4rem}
+.opt{display:flex; align-items:center; gap:.55rem; padding:.5rem .65rem; border:1px solid var(--line); border-radius:9px; cursor:pointer; font-size:.9rem; transition:.15s}
+.opt:hover{border-color:#a9bcd4; background:#f7faff}
+.opt .key{width:22px;height:22px;flex:0 0 22px;border-radius:6px;background:#eef2f8;display:grid;place-items:center;font-size:.72rem;font-weight:700;color:#4a5f7c}
+.opt.correct{border-color:var(--ok-line); background:var(--ok-bg)}
+.opt.correct .key{background:var(--ok); color:#fff}
+.opt.wrong{border-color:var(--bad-line); background:var(--bad-bg)}
+.opt.wrong .key{background:var(--bad); color:#fff}
+.opt.disabled{cursor:default}
+.fb{margin-top:.5rem; font-size:.85rem; padding:.5rem .65rem; border-radius:8px; display:none}
+.fb.show{display:block}
+.fb.good{background:var(--ok-bg); color:#14532d; border:1px solid var(--ok-line)}
+.fb.bad{background:var(--bad-bg); color:#7f1d1d; border:1px solid var(--bad-line)}
+.score-box{display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; background:var(--ink); color:#fff; border-radius:12px; padding:.7rem 1rem; margin-top:.8rem}
+.score-box b{font-size:1.3rem; font-family:"Cascadia Mono",Consolas,monospace}
+.score-box .bar{flex:1; min-width:120px; height:8px; background:rgba(255,255,255,.18); border-radius:99px; overflow:hidden}
+.score-box .bar i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--accent),#22c55e); transition:width .4s}
+
+/* ---------- Scenario ---------- */
+.scen{border:1px solid var(--line); border-radius:12px; padding:.9rem 1rem; background:#fff; margin:.6rem 0}
+.scen .st{font-weight:700; font-size:.85rem; color:var(--accent-d); letter-spacing:.08em}
+.scen .sd{font-size:.93rem; margin:.35rem 0 .6rem}
+.votes{display:flex; gap:.5rem; flex-wrap:wrap}
+.vote{padding:.35rem .9rem; border-radius:999px; border:1px solid var(--line); background:#fff; cursor:pointer; font:inherit; font-size:.85rem; font-weight:600}
+.vote.good:hover{border-color:var(--ok); color:var(--ok)}
+.vote.bad:hover{border-color:var(--bad); color:var(--bad)}
+.vote.picked{color:#fff}
+.vote.good.picked{background:var(--ok); border-color:var(--ok)}
+.vote.bad.picked{background:var(--bad); border-color:var(--bad)}
+.verdict{margin-top:.55rem; font-size:.87rem; display:none; padding:.55rem .7rem; border-radius:9px}
+.verdict.show{display:block}
+.verdict.good{background:var(--ok-bg); border:1px solid var(--ok-line); color:#14532d}
+.verdict.bad{background:var(--bad-bg); border:1px solid var(--bad-line); color:#7f1d1d}
+
+/* ---------- Component cards ---------- */
+.comp-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:.9rem}
+.comp{border:1px solid var(--line); border-radius:12px; background:#fff; overflow:hidden; transition:.18s}
+.comp:hover{transform:translateY(-3px); box-shadow:0 14px 30px rgba(15,23,42,.10)}
+.comp .top{padding:.7rem .85rem; border-bottom:1px solid var(--line); background:#fbfcfe; display:flex; align-items:center; gap:.6rem}
+.comp .top svg{width:74px; height:44px; color:#1f3a5f; flex:0 0 74px}
+.comp .nm{font-weight:700; font-size:.95rem}
+.comp .en{font-size:.72rem; color:var(--muted); letter-spacing:.06em}
+.comp .body{padding:.7rem .85rem; font-size:.86rem}
+.comp .row{display:flex; gap:.4rem; margin:.3rem 0}
+.comp .row .k{flex:0 0 88px; color:var(--muted); font-size:.8rem}
+.badge{display:inline-block; font-size:.68rem; padding:.15rem .5rem; border-radius:99px; border:1px solid var(--line); background:#f3f6fb; color:#41586f; letter-spacing:.05em}
+.badge.pasif{background:#e8efff; border-color:#bfd4ff; color:#1e40af}
+.badge.aktif{background:#fff1e0; border-color:#ffd7a1; color:#9a3412}
+
+/* ---------- Pipeline ---------- */
+.pipe{display:grid; grid-template-columns:repeat(auto-fill,minmax(168px,1fr)); gap:.7rem}
+.step{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.75rem .8rem;position:relative}
+.step .n{width:26px;height:26px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:.75rem;font-weight:700;margin-bottom:.4rem}
+.step h4{font-size:.9rem;margin:0 0 .25rem}
+.step p{font-size:.8rem;margin:0;color:var(--muted)}
+.flow{display:flex; flex-direction:column; gap:.35rem; align-items:center; margin:.6rem 0}
+.flow .fbox{background:#fff;border:1px solid var(--line);border-radius:10px;padding:.5rem .9rem;min-width:230px;text-align:center;font-weight:600;font-size:.9rem}
+.flow .fbox.danger{background:var(--bad-bg); border-color:var(--bad-line); color:#7f1d1d}
+.flow .fbox.go{background:var(--ok-bg); border-color:var(--ok-line); color:#14532d}
+.flow .arw{color:var(--accent-d); font-size:1.1rem; line-height:1}
+
+/* ---------- Misc visuals ---------- */
+.loop-wrap{display:flex; justify-content:center; padding:.4rem 0}
+.loop-wrap svg{width:100%; max-width:460px; height:auto}
+.mm-wrap{display:flex; justify-content:center}
+.mm-wrap svg{width:100%; max-width:640px; height:auto}
+.joint-compare{display:grid; grid-template-columns:1fr 1fr; gap:1rem}
+.joint{border-radius:12px; padding:.8rem 1rem; border:1px solid var(--line)}
+.joint.good{background:var(--ok-bg); border-color:var(--ok-line)}
+.joint.bad{background:var(--bad-bg); border-color:var(--bad-line)}
+.joint h4{margin:0 0 .4rem; font-size:.95rem}
+.measure-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem}
+.mcard{border:1px solid var(--line);border-radius:12px;padding:.9rem 1rem;background:#fff;text-align:center}
+.mcard .unit{font-family:"Cascadia Mono",Consolas,monospace;font-size:1.6rem;font-weight:700;color:var(--blue)}
+.mcard h4{margin:.2rem 0 .4rem}
+.mcard .howm{background:#f3f6fb;border-radius:8px;padding:.35rem .6rem;font-size:.82rem;margin-top:.4rem}
+.skill4{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem}
+.s4{border:1px solid var(--line);border-radius:14px;padding:1rem;background:#fff;text-align:center}
+.s4 .big{font-family:"Cascadia Mono",Consolas,monospace;font-size:1.9rem;font-weight:800;color:#cbd5e1}
+.s4 h4{margin:.1rem 0 .3rem}
+.s4 p{font-size:.85rem;color:var(--muted);margin:0}
+
+/* ---------- Sliders / forms ---------- */
+.slider-row{display:flex; align-items:center; gap:1rem; padding:.6rem 0; flex-wrap:wrap}
+.slider-row label{flex:0 0 260px; font-size:.9rem; font-weight:600}
+input[type=range]{flex:1; min-width:180px; accent-color:var(--blue)}
+.sval{width:44px;height:34px;border-radius:8px;background:var(--ink);color:#fff;display:grid;place-items:center;font-family:"Cascadia Mono",Consolas,monospace}
+textarea{width:100%; border:1px solid var(--line); border-radius:10px; padding:.6rem .7rem; font:inherit; font-size:.9rem; resize:vertical; min-height:70px}
+textarea:focus,input:focus{outline:2px solid #bfd4ff; border-color:var(--blue)}
+.field{margin:.7rem 0}
+.field label{display:block; font-size:.86rem; font-weight:600; margin-bottom:.25rem}
+
+/* ---------- Nav footer ---------- */
+.navfoot{display:flex; gap:.7rem; justify-content:space-between; align-items:center; padding:.9rem 0 0; border-top:1px dashed var(--line); margin-top:1.2rem}
+.navfoot .hint{font-size:.75rem; color:var(--muted)}
+
+/* ---------- Lecturer drawer ---------- */
+.fab{position:fixed; right:18px; bottom:18px; z-index:60; background:var(--ink); color:#fff; border:none; border-radius:999px; padding:.7rem 1.1rem; font:inherit; font-size:.85rem; font-weight:700; cursor:pointer; box-shadow:0 10px 26px rgba(15,23,42,.35); display:flex; gap:.5rem; align-items:center}
+.fab:hover{background:#1d2c48}
+.drawer{position:fixed; top:0; right:0; height:100vh; width:min(430px,100%); background:#fff; border-left:1px solid var(--line); box-shadow:-16px 0 40px rgba(15,23,42,.18); z-index:70; transform:translateX(102%); transition:transform .28s ease; display:flex; flex-direction:column}
+.drawer.open{transform:none}
+.drawer header{padding:1rem 1.1rem; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:.6rem; background:#0b1424; color:#fff}
+.drawer header h3{margin:0; font-size:.98rem; letter-spacing:.06em}
+.drawer .dbody{padding:1rem 1.1rem; overflow-y:auto; flex:1}
+.drawer .dfoot{padding:.8rem 1.1rem; border-top:1px solid var(--line); display:flex; gap:.5rem; flex-wrap:wrap}
+.lec-row{display:flex; align-items:center; gap:.55rem; padding:.42rem .3rem; border-bottom:1px solid #eef2f7; font-size:.88rem}
+.lec-row input{width:17px;height:17px;accent-color:var(--ok);cursor:pointer}
+.lec-row .nm{flex:1}
+.lec-row .du{font-family:"Cascadia Mono",Consolas,monospace; color:var(--muted); font-size:.82rem}
+.lec-row.fin .nm{text-decoration:line-through; color:var(--ok)}
+.overlay{position:fixed; inset:0; background:rgba(9,16,28,.42); z-index:65; display:none}
+.overlay.show{display:block}
+.tot{display:flex; justify-content:space-between; align-items:baseline; margin-top:.7rem; padding-top:.7rem; border-top:2px solid var(--ink); font-weight:700}
+.tot .v{font-family:"Cascadia Mono",Consolas,monospace; font-size:1.15rem}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1080px){ .g4,.skill4{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(2,1fr)} .measure-grid{grid-template-columns:1fr} }
+@media (max-width:900px){
+  .app{flex-direction:column}
+  .sidebar{position:relative; width:100%; flex:none; height:auto; border-right:none; border-bottom:1px solid var(--navline)}
+  .menu{display:flex; overflow-x:auto; gap:.3rem; padding:.5rem}
+  .menu h5, .side-foot{display:none}
+  .nav-item{width:auto; white-space:nowrap; flex:0 0 auto}
+  .nav-item .lab{display:none}
+  .nav-item.active .lab,.nav-item:hover .lab{display:inline}
+  .g2,.joint-compare{grid-template-columns:1fr}
+  .progress-wrap{top:0}
+  .topbar{position:static}
+}
+@media (max-width:620px){ .g3,.g4,.skill4{grid-template-columns:1fr} .content{padding:1rem .8rem 3rem} .slider-row label{flex:1 1 100%} }
+@media print{ .sidebar,.topbar,.progress-wrap,.fab,.drawer,.navfoot,.overlay{display:none} .section{display:block !important} }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="bolt">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3b2503" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h8l-1 8 10-12h-8l1-8z"/></svg>
+      </div>
+      <div>
+        <b>BENGKEL ELEKTRONIKA</b>
+        <span>PERTEMUAN 01</span>
+      </div>
+    </div>
+    <nav class="menu" id="menu">
+      <h5>LEARNING FLOW</h5>
+      <!-- nav items injected by JS -->
+    </nav>
+    <div class="side-foot">
+      D3 Teknik Elektro Industri · Semester 1<br>
+      Think · Build · Measure · Analyze · Solve
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div>
+        <div class="tb-title" id="tbTitle">Overview</div>
+        <div class="tb-sub" id="tbSub">Bengkel Elektronika — Pertemuan 01</div>
+      </div>
+      <div class="spacer"></div>
+      <div class="tb-tools">
+        <div class="timer-chip" id="timerChip" title="Timer sesi"><span id="timerLabel">30:00</span></div>
+        <button class="btn sm" id="btnTimer">Start</button>
+        <button class="btn sm" id="btnTimerReset">Reset</button>
+        <button class="btn sm" id="btnProjector">Projector</button>
+        <button class="btn sm" id="btnReset">Reset Progress</button>
+      </div>
+    </header>
+    <div class="progress-wrap"><div class="progress-bar" id="pbar"></div></div>
+
+    <div class="content">
+
+      <!-- ========== 1. OVERVIEW ========== -->
+      <section class="section active" id="sec-overview" data-title="Overview" data-sub="Start Your Workshop Journey">
+        <div class="hero">
+          <h1>BENGKEL ELEKTRONIKA</h1>
+          <h2>PERTEMUAN 01 — START YOUR WORKSHOP JOURNEY</h2>
+          <p class="sub">"Think. Build. Measure. Analyze. Solve."</p>
+          <div class="hero-meta">
+            <span class="pill amber">D3 Teknik Elektro Industri</span>
+            <span class="pill">Duration: 4 Hours (4 JP × 60 min)</span>
+            <span class="pill">Semester 1</span>
+            <span class="pill">Workshop Based · Learning by Doing</span>
+          </div>
+        </div>
+
+        <div class="grid g4" style="margin-bottom:1rem">
+          <div class="kpi"><b>4 JP</b><span>Total waktu pertemuan</span></div>
+          <div class="kpi"><b>9</b><span>Sesi aktivitas</span></div>
+          <div class="kpi"><b>30%</b><span>Teori pendukung</span></div>
+          <div class="kpi"><b>70%</b><span>Praktik & observasi</span></div>
+        </div>
+
+        <div class="card">
+          <h3>Filosofi Pembelajaran Bengkel Elektronika</h3>
+          <p class="muted">Satu siklus kerja yang akan dipakai dari pertemuan 1 sampai akhir semester. Bukan garis lurus — ini <b>loop</b> yang terus berputar.</p>
+          <div class="loop-wrap">
+            <svg viewBox="0 0 460 460" role="img" aria-label="Siklus kerja elektronika">
+              <defs>
+                <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0 0 L10 5 L0 10 z" fill="#f59e0b"/>
+                </marker>
+              </defs>
+              <circle cx="230" cy="230" r="140" fill="none" stroke="#e2e8f0" stroke-width="2" stroke-dasharray="4 6"/>
+              <g fill="none" stroke="#f59e0b" stroke-width="2.4" marker-end="url(#ah)" opacity=".85">
+                <path d="M259.1 93.1 A140 140 0 0 1 347.4 153.8"/>
+                <path d="M347.4 153.8 A140 140 0 0 1 366.9 259.1"/>
+                <path d="M366.9 259.1 A140 140 0 0 1 306.2 347.4"/>
+                <path d="M306.2 347.4 A140 140 0 0 1 200.9 366.9"/>
+                <path d="M200.9 366.9 A140 140 0 0 1 112.6 306.2"/>
+                <path d="M112.6 306.2 A140 140 0 0 1 93.1 200.9"/>
+                <path d="M93.1 200.9 A140 140 0 0 1 153.8 112.6"/>
+                <path d="M153.8 112.6 A140 140 0 0 1 259.1 93.1"/>
+              </g>
+              <g font-family="Segoe UI, Arial" font-size="11.5" font-weight="700" text-anchor="middle">
+                <rect x="187" y="75" width="86" height="30" rx="15" fill="#0b1424"/><text x="230" y="95" fill="#fff">IDE</text>
+                <rect x="286" y="116" width="86" height="30" rx="15" fill="#f59e0b"/><text x="329" y="136" fill="#3b2503">DESIGN</text>
+                <rect x="327" y="215" width="86" height="30" rx="15" fill="#2563eb"/><text x="370" y="235" fill="#fff">ASSEMBLY</text>
+                <rect x="286" y="314" width="86" height="30" rx="15" fill="#0b1424"/><text x="329" y="334" fill="#fff">TEST</text>
+                <rect x="187" y="355" width="86" height="30" rx="15" fill="#f59e0b"/><text x="230" y="375" fill="#3b2503">MEASURE</text>
+                <rect x="88" y="314" width="86" height="30" rx="15" fill="#2563eb"/><text x="131" y="334" fill="#fff">ANALYZE</text>
+                <rect x="47" y="215" width="86" height="30" rx="15" fill="#0b1424"/><text x="90" y="233" fill="#fff" font-size="9.5">TROUBLE</text><text x="90" y="244" fill="#fff" font-size="9.5">SHOOT</text>
+                <rect x="88" y="116" width="86" height="30" rx="15" fill="#15803d"/><text x="131" y="136" fill="#fff">IMPROVE</text>
+              </g>
+              <text x="230" y="228" text-anchor="middle" font-family="Segoe UI" font-size="13" font-weight="700" fill="#5b6b82">ENGINEERING</text>
+              <text x="230" y="246" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#8b9bae">WORK LOOP</text>
+            </svg>
+          </div>
+          <div class="quote">"Engineer tidak hanya membuat rangkaian bekerja, tetapi harus memahami <b>mengapa</b> rangkaian tersebut bekerja atau tidak bekerja."</div>
+        </div>
+
+        <div class="card">
+          <h3>4 SKILLS YOU WILL BUILD</h3>
+          <p class="muted small">Empat kemampuan inti yang dilatih sepanjang semester — hasil akhirnya bukan sekadar "menyala".</p>
+          <div class="skill4" style="margin-top:.8rem">
+            <div class="s4"><div class="big">01</div><h4>DESIGN</h4><p>"Can you design the circuit?"</p></div>
+            <div class="s4"><div class="big">02</div><h4>BUILD</h4><p>"Can you assemble it correctly?"</p></div>
+            <div class="s4"><div class="big">03</div><h4>MEASURE</h4><p>"Can you prove what is happening?"</p></div>
+            <div class="s4"><div class="big">04</div><h4>SOLVE</h4><p>"Can you find why it doesn't work?"</p></div>
+          </div>
+          <div class="note ok" style="margin-top:1rem">
+            <b>Tujuan akhir mata kuliah</b>
+            The goal is not simply to make a circuit work. The goal is to understand the circuit well enough to make it work <b>reliably</b>.
+          </div>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h3>Tujuan Pembelajaran Pertemuan 1</h3>
+            <p class="muted small">Setelah pertemuan ini, mahasiswa mampu:</p>
+            <ol class="clean" style="font-size:.9rem">
+              <li>Menilai kemampuan awal (Bahasa Indonesia, matematika dasar, logika, Bahasa Inggris).</li>
+              <li>Mematuhi kontrak kuliah & aturan perilaku workshop.</li>
+              <li>Menjelaskan pentingnya K3 dalam pekerjaan elektronika.</li>
+              <li>Mengenali komponen pasif dan aktif secara umum.</li>
+              <li>Menjelaskan alur kerja elektronika: Design → Prepare → Assembly → Soldering → Testing → Measurement → Troubleshooting → Improvement.</li>
+              <li>Mengenali fungsi dasar AVO/multimeter.</li>
+              <li>Menjelaskan konsep dasar pengukuran tegangan, arus, dan resistansi.</li>
+              <li>Menunjukkan attitude kerja workshop yang baik.</li>
+              <li>Melakukan observasi sederhana terhadap komponen & alat workshop.</li>
+              <li>Memahami bahwa kesalahan adalah bagian dari belajar — asal diselesaikan sistematis & aman.</li>
+            </ol>
+          </div>
+          <div class="card">
+            <h3>Roadmap Pertemuan 1</h3>
+            <table>
+              <thead><tr><th>Sesi</th><th>Aktivitas</th><th style="width:80px">Durasi</th></tr></thead>
+              <tbody id="roadmapBody"></tbody>
+            </table>
+            <div class="note blue" style="margin-top:.8rem">
+              <b>Cara belajar di workshop ini</b>
+              activity → observation → practice → measurement → analysis → reflection.
+              Teori diberikan secukupnya sebagai dasar praktik, bukan sebagai hafalan.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 2. MATRIKULASI ========== -->
+      <section class="section" id="sec-matrikulasi" data-title="Matrikulasi" data-sub="Baseline Kemampuan Awal · 30 menit">
+        <div class="sec-head">
+          <div>
+            <div class="kicker">Session 01</div>
+            <h2>MATRIKULASI</h2>
+          </div>
+          <div class="tag">30 min / 4 hours</div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+            <div style="flex:1;min-width:220px">
+              <div class="muted small">Progress alokasi waktu sesi</div>
+              <div class="progress-wrap" style="position:static;height:10px;border-radius:99px;overflow:hidden;margin-top:.3rem">
+                <div class="progress-bar" style="width:12.5%"></div>
+              </div>
+              <div class="small muted" style="margin-top:.3rem">30 menit dari total 240 menit (4 JP)</div>
+            </div>
+            <div style="text-align:center">
+              <div class="muted small">Timer</div>
+              <div style="font-family:'Cascadia Mono',Consolas,monospace;font-size:2.1rem;font-weight:700;line-height:1.1" id="matDisplay">30:00</div>
+              <div style="display:flex;gap:.35rem;justify-content:center;margin-top:.4rem">
+                <button class="btn sm amber" onclick="Timer.toggle()">Start / Pause</button>
+                <button class="btn sm" onclick="Timer.set(30)">Reset 30:00</button>
+              </div>
+            </div>
+          </div>
+          <div class="note" style="margin-top:.9rem">
+            <b>Catatan dosen</b>
+            "Kerjakan secara mandiri. Hasil tes digunakan untuk mengetahui kebutuhan belajar mahasiswa — <b>bukan</b> untuk menentukan nilai akhir."
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Baseline Test — 8 Soal Singkat</h3>
+          <p class="muted small">Kerjakan mandiri (±15 menit), lalu tekan <b>Periksa Jawaban</b> untuk melihat kunci dan pembahasan. Tekan tombol <b>Space</b> untuk menampilkan/menyembunyikan kunci.</p>
+          <div id="matQuiz"></div>
+          <div class="score-box">
+            <span>Skor baseline:</span><b id="matScore">0/8</b>
+            <span class="bar"><i id="matBar"></i></span>
+            <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.35)" onclick="Quiz.reset('mat')">Ulang</button>
+          </div>
+          <div class="note blue" style="margin-top:.8rem">
+            <b>Interpretasi dosen</b>
+            Skor rendah di <b>matematika dasar</b> → butuh drill satuan & prefix (m, k, M). Skor rendah di <b>logika</b> → perbanyak latihan troubleshooting bertahap. Skor rendah di <b>Bahasa Inggris</b> → sediakan glosarium istilah teknis (datasheet).
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 3. CONTRACT ========== -->
+      <section class="section" id="sec-kontrak" data-title="Kontrak Kuliah" data-sub="Aturan Main Workshop · 30 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 02</div><h2>CONTRACT &amp; WORKSHOP ATTITUDE</h2></div>
+          <div class="tag">30 min</div>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h3>Kontrak Kuliah</h3>
+            <p class="muted small">Disepakati bersama di awal semester dan berlaku sampai akhir.</p>
+            <table>
+              <thead><tr><th style="width:28px">#</th><th>Aturan</th></tr></thead>
+              <tbody id="contractBody"></tbody>
+            </table>
+          </div>
+          <div class="card">
+            <h3>5R WORKSHOP</h3>
+            <p class="muted small">Adaptasi budaya 5R/5S untuk bengkel elektronika.</p>
+            <div id="fiveR" class="grid" style="gap:.5rem"></div>
+
+            <h3 style="margin-top:1.2rem">GOOD WORKSHOP ATTITUDE</h3>
+            <ul class="tick" id="attitudeList" style="font-size:.9rem"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 4. ATTITUDE SCENARIO ========== -->
+      <section class="section" id="sec-attitude" data-title="Attitude Check" data-sub="Good Practice vs Bad Practice">
+        <div class="sec-head">
+          <div><div class="kicker">Session 02 — Interactive</div><h2>WHICH ATTITUDE IS CORRECT?</h2></div>
+          <div class="tag">Diskusi kelas</div>
+        </div>
+
+        <div class="card">
+          <p class="muted">Baca setiap skenario, pilih <b>GOOD PRACTICE</b> atau <b>BAD PRACTICE</b>, lalu baca alasannya.</p>
+          <div id="scenarios"></div>
+          <div class="score-box">
+            <span>Jawaban benar:</span><b id="scnScore">0/4</b>
+            <span class="bar"><i id="scnBar"></i></span>
+            <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.35)" onclick="Quiz.reset('scn')">Ulang</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Rules of Engagement di Workshop</h3>
+          <div class="grid g3" style="font-size:.9rem">
+            <div class="card tight"><b>Ask before guessing</b><p class="muted small" style="margin:0">Bertanya 30 detik lebih murah daripada mengganti komponen 30 menit.</p></div>
+            <div class="card tight"><b>Measure before replacing</b><p class="muted small" style="margin:0">Ukur dulu, baru ganti. Komponen yang dicabut belum tentu yang rusak.</p></div>
+            <div class="card tight"><b>Record your findings</b><p class="muted small" style="margin:0">Catatan pengukuran adalah bukti kerja engineer, bukan formalitas.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 5. K3 ========== -->
+      <section class="section" id="sec-k3" data-title="K3" data-sub="Keselamatan & Kesehatan Kerja · 40 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 03</div><h2>K3 WORKSHOP ELEKTRONIKA</h2></div>
+          <div class="tag">40 min</div>
+        </div>
+
+        <div class="hero" style="background:linear-gradient(135deg,#7f1d1d 0%,#b91c1c 55%,#f59e0b 130%)">
+          <h1 style="font-size:clamp(1.7rem,4vw,2.6rem)">SAFETY FIRST</h1>
+          <p class="sub" style="color:#ffe9e9; font-size:1.05rem">"Tidak ada rangkaian yang lebih penting daripada keselamatan."</p>
+          <div class="hero-meta">
+            <span class="pill">Electrical Safety</span><span class="pill">Soldering Safety</span>
+            <span class="pill">Workshop Safety</span><span class="pill">Emergency Response</span>
+          </div>
+        </div>
+
+        <div class="grid g3">
+          <div class="card">
+            <h3 style="color:var(--bad)">Electrical Safety</h3>
+            <ul class="tick" id="k3Elec" style="font-size:.89rem"></ul>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--accent-d)">Soldering Safety</h3>
+            <ul class="tick" id="k3Solder" style="font-size:.89rem"></ul>
+          </div>
+          <div class="card">
+            <h3 style="color:var(--blue)">Workshop Safety</h3>
+            <ul class="tick" id="k3Work" style="font-size:.89rem"></ul>
+          </div>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h3>Emergency Response</h3>
+            <p class="muted small">Hafalkan urutan ini. Urutan tidak boleh dibalik.</p>
+            <div class="flow" id="emergencyFlow"></div>
+            <div class="note bad" style="margin-top:.8rem">
+              <b>Ingat</b>
+              Putuskan sumber (DISCONNECT POWER) <b>sebelum</b> menyentuh korban atau rangkaian.
+            </div>
+          </div>
+          <div class="card">
+            <h3>Checklist K3 Sebelum Praktik</h3>
+            <p class="muted small">Centang bersama instruktur sebelum power ON.</p>
+            <div id="k3Check"></div>
+            <div class="small muted" style="margin-top:.6rem">Progress: <b id="k3Prog">0/8</b></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>K3 Quiz — 5 Pertanyaan</h3>
+          <div id="k3Quiz"></div>
+          <div class="score-box">
+            <span>Skor K3:</span><b id="k3Score">0/5</b>
+            <span class="bar"><i id="k3Bar"></i></span>
+            <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.35)" onclick="Quiz.reset('k3')">Ulang</button>
+          </div>
+          <div class="note bad" style="margin-top:.8rem">
+            <b>Syarat lulus</b>
+            Skor K3 minimal <b>5/5</b> sebelum mahasiswa boleh menyentuh soldering iron dan power supply.
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 6. COMPONENTS ========== -->
+      <section class="section" id="sec-komponen" data-title="Components" data-sub="Komponen Pasif & Aktif · 45 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 04</div><h2>ELECTRONIC COMPONENT FUNDAMENTALS</h2></div>
+          <div class="tag">45 min · global overview</div>
+        </div>
+
+        <div class="card">
+          <h3>Klasifikasi Komponen</h3>
+          <div class="flow" style="align-items:stretch">
+            <div class="fbox" style="background:var(--ink);color:#fff;border-color:var(--ink)">COMPONENT</div>
+            <div class="arw">↓</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;width:100%">
+              <div class="fbox" style="background:var(--blue-bg);border-color:#bfd4ff">PASSIVE<br><span class="small muted">tidak memerlukan sumber daya eksternal untuk fungsi dasarnya</span></div>
+              <div class="fbox" style="background:var(--accent-bg);border-color:#ffd7a1">ACTIVE<br><span class="small muted">mengontrol aliran arus / memerlukan bias</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;margin-bottom:.8rem">
+            <h3 style="margin:0">Know Your Component</h3>
+            <div class="spacer" style="flex:1"></div>
+            <button class="btn sm" onclick="Comp.filter('all')">Semua</button>
+            <button class="btn sm" onclick="Comp.filter('pasif')">Passive</button>
+            <button class="btn sm" onclick="Comp.filter('aktif')">Active</button>
+          </div>
+          <div class="comp-grid" id="compGrid"></div>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h3>Resistor Color Code — Kalkulator</h3>
+            <p class="muted small">Pilih 4 gelang warna untuk membaca nilai resistansi.</p>
+            <div class="grid g4" style="gap:.6rem" id="bandPick"></div>
+            <div class="note blue" style="margin-top:.8rem">
+              <b>Hasil pembacaan</b>
+              <div style="font-family:'Cascadia Mono',Consolas,monospace;font-size:1.25rem;font-weight:700" id="bandOut">—</div>
+              <div class="small" id="bandCalc"></div>
+            </div>
+            <p class="small muted" style="margin-top:.6rem">Rumus: R = (D1 × 10 + D2) × 10<sup>M</sup> Ω ± toleransi.</p>
+          </div>
+          <div class="card">
+            <h3>Component Quiz — 5 Pertanyaan</h3>
+            <div id="compQuiz"></div>
+            <div class="score-box">
+              <span>Skor:</span><b id="compScore">0/5</b>
+              <span class="bar"><i id="compBar"></i></span>
+              <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.35)" onclick="Quiz.reset('comp')">Ulang</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 7. WORKFLOW ========== -->
+      <section class="section" id="sec-workflow" data-title="Workflow" data-sub="Alur Kerja Elektronika · 30 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 05</div><h2>BASIC ELECTRONIC WORKFLOW</h2></div>
+          <div class="tag">30 min</div>
+        </div>
+        <div class="card">
+          <p class="muted">Sepuluh langkah standar yang dipakai di setiap job sheet semester ini. Jangan melompat langkah — terutama langkah 5 (INSPECTION) dan langkah 6 (POWER ON).</p>
+          <div class="pipe" id="pipe"></div>
+        </div>
+        <div class="grid g2">
+          <div class="card">
+            <h3>Checklist Sebelum POWER ON</h3>
+            <div id="pwCheck"></div>
+          </div>
+          <div class="card">
+            <h3>Kesalahan Paling Sering Terjadi</h3>
+            <table>
+              <thead><tr><th>Gejala</th><th>Penyebab umum</th></tr></thead>
+              <tbody>
+                <tr><td>Rangkaian tidak menyala</td><td>Power supply OFF / kabel longgar / polaritas terbalik</td></tr>
+                <tr><td>Komponen panas</td><td>Short circuit, nilai resistor salah, arus berlebih</td></tr>
+                <tr><td>LED redup</td><td>Nilai resistor seri terlalu besar</td></tr>
+                <tr><td>LED terbakar</td><td>Tanpa resistor pembatas arus</td></tr>
+                <tr><td>IC cepat rusak</td><td>ESD, polaritas VCC/GND terbalik, tegangan berlebih</td></tr>
+                <tr><td>Hasil ukur aneh</td><td>Salah mode multimeter, probe di jack yang salah</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 8. SOLDERING ========== -->
+      <section class="section" id="sec-soldering" data-title="Soldering" data-sub="Basic Soldering · 30 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 06</div><h2>BASIC SOLDERING</h2></div>
+          <div class="tag">30 min</div>
+        </div>
+
+        <div class="card">
+          <h3>Soldering Workflow</h3>
+          <div class="quote" style="font-family:'Cascadia Mono',Consolas,monospace">HEAT → APPLY SOLDER → REMOVE SOLDER → INSPECT</div>
+          <ol class="clean" style="font-size:.92rem;margin-top:.9rem" id="solderSteps"></ol>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h3>Good vs Bad Solder Joint</h3>
+            <div class="joint-compare">
+              <div class="joint good">
+                <h4 style="color:var(--ok)">GOOD SOLDER JOINT</h4>
+                <ul class="tick" style="font-size:.87rem">
+                  <li>Permukaan mengkilap (shiny), bukan kusam</li>
+                  <li>Bentuk kerucut halus mengikuti kaki komponen</li>
+                  <li>Timah menyebar rata ke pad dan kaki</li>
+                  <li>Tidak ada celah / retak</li>
+                  <li>Komponen tidak bergerak saat ditarik pelan</li>
+                </ul>
+              </div>
+              <div class="joint bad">
+                <h4 style="color:var(--bad)">BAD SOLDER JOINT</h4>
+                <ul style="font-size:.87rem;padding-left:1.1rem">
+                  <li><b>Cold solder</b>: kusam, bergumpal, sambungan rapuh</li>
+                  <li><b>Solder bridge</b>: timah menghubungkan dua pad</li>
+                  <li><b>Dry joint</b>: timah tidak melekat sempurna</li>
+                  <li><b>Excess solder</b>: bola timah berlebih</li>
+                  <li><b>Lifted pad</b>: jalur PCB terkelupas karena panas</li>
+                </ul>
+              </div>
+            </div>
+            <div class="note" style="margin-top:.9rem">
+              <b>Aturan 2 detik</b>
+              Panaskan <b>joint</b> (bukan timahnya) selama ±1–2 detik, sentuhkan solder ke joint yang panas, bukan ke ujung solder.
+            </div>
+          </div>
+          <div class="card">
+            <h3>Soldering Inspection Checklist</h3>
+            <p class="muted small">Centang setiap selesai menyolder satu titik.</p>
+            <div id="soldCheck"></div>
+            <div class="note bad" style="margin-top:.8rem">
+              <b>Soldering Safety</b>
+              Suhu ujung 300–400 °C. Letakkan soldering iron di <b>stand</b> — bukan di meja. Matikan jika ditinggalkan. Ventilasi harus baik; jangan hirup asap flux langsung.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 9. MULTIMETER ========== -->
+      <section class="section" id="sec-multimeter" data-title="Multimeter" data-sub="AVO / Multimeter · 30 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 07</div><h2>BASIC MEASUREMENT WITH AVO / MULTIMETER</h2></div>
+          <div class="tag">30 min</div>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h3>Bagian Multimeter</h3>
+            <div class="mm-wrap">
+              <svg viewBox="0 0 640 400" role="img" aria-label="Bagian-bagian multimeter">
+                <rect x="180" y="40" width="280" height="300" rx="18" fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+                <rect x="212" y="70" width="216" height="76" rx="8" fill="#0f172a"/>
+                <text x="320" y="118" text-anchor="middle" font-family="Cascadia Mono, Consolas" font-size="34" fill="#22c55e">1.000</text>
+                <circle cx="320" cy="215" r="52" fill="#e2e8f0" stroke="#475569" stroke-width="3"/>
+                <circle cx="320" cy="215" r="12" fill="#0f172a"/>
+                <g stroke="#475569" stroke-width="3" stroke-linecap="round">
+                  <path d="M320 215 L320 173"/><path d="M320 215 L350 197"/><path d="M320 215 L290 197"/>
+                  <path d="M320 215 L320 257"/><path d="M320 215 L290 233"/><path d="M320 215 L350 233"/>
+                </g>
+                <g font-family="Segoe UI" font-size="12" font-weight="700" fill="#475569" text-anchor="middle">
+                  <text x="320" y="165">V</text><text x="374" y="196">Ω</text><text x="266" y="196">A</text>
+                  <text x="320" y="272">OFF</text>
+                </g>
+                <g>
+                  <circle cx="248" cy="300" r="13" fill="#1e293b"/><text x="248" y="332" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#334155">10A</text>
+                  <circle cx="290" cy="300" r="13" fill="#1e293b"/><text x="290" y="332" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#334155">mA</text>
+                  <circle cx="350" cy="300" r="13" fill="#b91c1c"/><text x="350" y="332" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#334155">VΩ</text>
+                  <circle cx="392" cy="300" r="13" fill="#1e293b"/><text x="392" y="332" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#334155">COM</text>
+                </g>
+                <!-- probes -->
+                <g stroke="#b91c1c" stroke-width="4" fill="none" stroke-linecap="round">
+                  <path d="M392 300 C 470 330, 520 320, 560 300"/>
+                </g>
+                <g stroke="#0f172a" stroke-width="4" fill="none" stroke-linecap="round">
+                  <path d="M350 300 C 420 350, 480 366, 520 350"/>
+                </g>
+                <circle cx="566" cy="298" r="9" fill="#b91c1c"/><circle cx="526" cy="349" r="9" fill="#0f172a"/>
+                <!-- labels -->
+                <g font-family="Segoe UI" font-size="13" fill="#0f172a">
+                  <text x="42" y="66" font-weight="700">Display</text><path d="M110 60 H 205" stroke="#94a3b8" stroke-width="2"/>
+                  <text x="40" y="222" font-weight="700">Selector</text><path d="M108 216 H 262" stroke="#94a3b8" stroke-width="2"/>
+                  <text x="470" y="230" font-weight="700">Test probe</text><path d="M552 236 C 540 250, 535 268, 534 282" stroke="#94a3b8" stroke-width="2" fill="none"/>
+                  <text x="470" y="378" font-weight="700">Test probe</text>
+                </g>
+                <g font-family="Segoe UI" font-size="12" fill="#94a3b8">
+                  <text x="320" y="368" text-anchor="middle">Terminal: 10A · mA · VΩ · COM</text>
+                </g>
+              </svg>
+            </div>
+            <table style="margin-top:.6rem">
+              <thead><tr><th>Terminal</th><th>Fungsi</th></tr></thead>
+              <tbody>
+                <tr><td class="mono">COM</td><td>Common / ground — probe hitam selalu di sini</td></tr>
+                <tr><td class="mono">VΩ</td><td>Voltage &amp; resistance — probe merah untuk ukur V dan Ω</td></tr>
+                <tr><td class="mono">mA / 10A</td><td>Arus — probe merah dipindah ke sini, rangkaian diseri</td></tr>
+                <tr><td class="mono">Selector</td><td>Memilih fungsi &amp; range. Selalu cek sebelum probe menempel</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3>Tiga Pengukuran Dasar</h3>
+            <div class="measure-grid" style="grid-template-columns:1fr;gap:.8rem">
+              <div class="mcard" style="text-align:left">
+                <div class="unit">Ω</div><h4>RESISTANCE</h4>
+                <p class="small muted" style="margin:0">Mengukur hambatan komponen.</p>
+                <div class="howm"><b>Kondisi:</b> rangkaian TIDAK bertegangan (power OFF)</div>
+              </div>
+              <div class="mcard" style="text-align:left">
+                <div class="unit">V</div><h4>VOLTAGE</h4>
+                <p class="small muted" style="margin:0">Mengukur beda potensial dua titik.</p>
+                <div class="howm"><b>Cara ukur:</b> PARALLEL dengan beban</div>
+              </div>
+              <div class="mcard" style="text-align:left">
+                <div class="unit">A</div><h4>CURRENT</h4>
+                <p class="small muted" style="margin:0">Mengukur arus yang mengalir.</p>
+                <div class="howm"><b>Cara ukur:</b> SERIES — rangkaian harus diputus</div>
+              </div>
+            </div>
+            <div class="note bad" style="margin-top:1rem">
+              <b>PERINGATAN</b>
+              "Salah memilih mode pengukuran dapat menyebabkan fuse multimeter putus atau kerusakan alat." Contoh fatal: mengukur tegangan 220 V dengan selector di posisi Ω atau A → <b>short circuit</b>.
+            </div>
+            <h4 style="margin-top:1rem">Urutan aman saat mengukur</h4>
+            <ol class="clean" style="font-size:.88rem">
+              <li>Tentukan besaran yang diukur (V / A / Ω).</li>
+              <li>Pasang probe ke jack yang benar (merah ke VΩ atau A).</li>
+              <li>Putar selector ke fungsi &amp; range tertinggi lebih dulu.</li>
+              <li>Barau tempelkan probe; turunkan range bila perlu.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Voltage → Parallel &nbsp;·&nbsp; Current → Series &nbsp;·&nbsp; Resistance → Power OFF</h3>
+          <div class="grid g3" style="margin-top:.6rem">
+            <div class="card tight">
+              <h4>VOLTAGE — PARALLEL</h4>
+              <pre class="mono" style="background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.6rem;font-size:.78rem;overflow:auto">
+ + ----●---------[ R ]---------●---- -
+        |                      |
+        |      ( V meter )     |
+        ●--------[  V  ]-------●
+              probe merah  probe hitam</pre>
+              <p class="small muted" style="margin:.4rem 0 0">Probe menempel di dua titik tanpa memutus rangkaian.</p>
+            </div>
+            <div class="card tight">
+              <h4>CURRENT — SERIES</h4>
+              <pre class="mono" style="background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:.6rem;font-size:.78rem;overflow:auto">
+ + ---[ A meter ]----●----[ R ]----●-- -
+     arus masuk   arus keluar
+   (rangkaian DIPUTUS, meter DISISIPKAN)</pre>
+              <p class="small muted" style="margin:.4rem 0 0">Arus harus lewat melalui meter. Salah pasang = short.</p>
+            </div>
+            <div class="card tight">
+              <h4>RESISTANCE — POWER OFF</h4>
+              <pre class="mono" style="background:#fdf2f2;border:1px solid var(--bad-line);border-radius:8px;padding:.6rem;font-size:.78rem;overflow:auto">
+  POWER SUPPLY  ->  OFF
+  Lepas salah satu kaki komponen
+  barulah ukur  Ω
+  (jangan ukur rangkaian bertegangan)</pre>
+              <p class="small muted" style="margin:.4rem 0 0">Meter mengirim arus kecil sendiri; tegangan luar merusak bacaan &amp; alat.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 10. MINI CHALLENGE ========== -->
+      <section class="section" id="sec-challenge" data-title="Mini Challenge" data-sub="Can You Make It Work? · 25 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 08 — Hands On</div><h2>MINI WORKSHOP CHALLENGE</h2></div>
+          <div class="tag">25 min · kelompok 2–3 orang</div>
+        </div>
+
+        <div class="hero" style="background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 60%,#f59e0b 140%)">
+          <h1 style="font-size:clamp(1.5rem,3.4vw,2.2rem)">MINI CHALLENGE — "CAN YOU MAKE IT WORK?"</h1>
+          <p class="sub" style="color:#dbeafe">Kerja berkelompok 2–3 orang. Targetnya sederhana, prosesnya yang dinilai.</p>
+        </div>
+
+        <div class="grid g3">
+          <div class="card">
+            <h3>TARGET</h3>
+            <div class="quote" style="font-size:1rem">LED menyala dengan <b>aman</b>.</div>
+            <ul class="clean small" style="margin-top:.6rem">
+              <li>Terang wajar (tidak redup, tidak overdrive)</li>
+              <li>Arus dalam batas aman (&lt; 20 mA)</li>
+              <li>Tidak ada komponen yang panas</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>TOOLS &amp; MATERIALS</h3>
+            <ul class="tick" style="font-size:.9rem">
+              <li>Breadboard</li><li>Resistor (seri pembatas arus)</li><li>LED</li>
+              <li>DC Power Supply</li><li>Multimeter</li><li>Jumper wire</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>RULE</h3>
+            <div class="note bad" style="margin:0">
+              <b>Dilarang</b>
+              Langsung mengganti komponen sebelum menemukan kemungkinan penyebab masalah. Ukur dulu → catat → baru simpulkan.
+            </div>
+          </div>
+        </div>
+
+        <div class="grid g2">
+          <div class="card">
+            <h3>Langkah Pengerjaan</h3>
+            <ol class="clean" style="font-size:.92rem">
+              <li>Identifikasi komponen yang diberikan (resistor, LED, jumper).</li>
+              <li>Tentukan nilai resistor berdasarkan <b>kode warna</b> (pakai kalkulator di sesi Components).</li>
+              <li>Hitung resistor pembatas arus: <span class="mono">R = (Vs − Vf) / If</span>.</li>
+              <li>Rangkai LED + resistor seri pada breadboard.</li>
+              <li>Periksa polaritas LED: kaki panjang = anoda (+), kaki pendek / sisi rata = katoda (−).</li>
+              <li>INSPECTION: cek wiring, short, orientasi — <b>sebelum</b> power ON.</li>
+              <li>Ukur tegangan suplai dan tegangan di kaki LED dengan multimeter.</li>
+              <li>Pastikan LED bekerja. Jika tidak → troubleshooting bertahap.</li>
+            </ol>
+            <div class="note blue">
+              <b>Contoh hitungan cepat</b>
+              Vs = 5 V, LED merah Vf ≈ 2 V, target If = 10 mA → R = (5 − 2) / 0,01 = <b>300 Ω</b> (pakai 330 Ω standar).
+            </div>
+          </div>
+          <div class="card">
+            <h3>Kalkulator Resistor LED</h3>
+            <div class="grid g3" style="gap:.6rem">
+              <div class="field" style="margin:0"><label>Vs (V)</label><input type="number" id="ledVs" value="5" step="0.1" style="width:100%;padding:.45rem;border:1px solid var(--line);border-radius:8px;font:inherit"></div>
+              <div class="field" style="margin:0"><label>Vf LED (V)</label><input type="number" id="ledVf" value="2" step="0.1" style="width:100%;padding:.45rem;border:1px solid var(--line);border-radius:8px;font:inherit"></div>
+              <div class="field" style="margin:0"><label>If (mA)</label><input type="number" id="ledIf" value="10" step="1" style="width:100%;padding:.45rem;border:1px solid var(--line);border-radius:8px;font:inherit"></div>
+            </div>
+            <div class="note ok" style="margin-top:.8rem">
+              <b>Hasil</b>
+              <div class="mono" style="font-size:1.1rem;font-weight:700" id="ledOut">R = 300 Ω</div>
+              <div class="small" id="ledNote">Gunakan nilai standar terdekat di atasnya (E12: 330 Ω).</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Troubleshooting Questions</h3>
+          <p class="muted small">Jika LED tidak menyala, jawab berurutan. Checklist ini adalah metode — bukan tebakan.</p>
+          <div id="tsCheck"></div>
+          <div class="small muted" style="margin-top:.6rem">Progress: <b id="tsProg">0/7</b></div>
+        </div>
+      </section>
+
+      <!-- ========== 11. REFLECTION ========== -->
+      <section class="section" id="sec-refleksi" data-title="Reflection" data-sub="Refleksi Diri · 10 menit">
+        <div class="sec-head">
+          <div><div class="kicker">Session 09</div><h2>REFLECTION</h2></div>
+          <div class="tag">10 min</div>
+        </div>
+
+        <div class="card">
+          <h3>Confidence Check</h3>
+          <div class="slider-row">
+            <label>BEFORE TODAY — Seberapa percaya diri kamu menggunakan alat elektronika?</label>
+            <input type="range" min="1" max="5" value="1" id="confBefore" oninput="Refl.update()">
+            <div class="sval" id="confBeforeV">1</div>
+          </div>
+          <div class="slider-row">
+            <label>AFTER TODAY — Seberapa percaya diri kamu sekarang?</label>
+            <input type="range" min="1" max="5" value="3" id="confAfter" oninput="Refl.update()">
+            <div class="sval" id="confAfterV">3</div>
+          </div>
+          <div class="note ok" id="confNote"><b>Delta</b> +2 — ada peningkatan. Catat apa yang membuatmu lebih percaya diri.</div>
+        </div>
+
+        <div class="card">
+          <h3>Pertanyaan Refleksi</h3>
+          <div class="field"><label>Apa hal paling baru yang kamu pelajari hari ini?</label><textarea id="r1" placeholder="Tulis dengan kata-katamu sendiri..."></textarea></div>
+          <div class="field"><label>Apa bagian yang paling sulit?</label><textarea id="r2" placeholder="Misalnya: membaca kode warna, memegang soldering iron, memilih mode multimeter..."></textarea></div>
+          <div class="field"><label>Alat apa yang ingin kamu pelajari lebih lanjut?</label><textarea id="r3" placeholder="Misalnya: oscilloscope, power supply, soldering station..."></textarea></div>
+          <div class="field"><label>Jika sebuah rangkaian tidak bekerja, apa yang akan kamu lakukan terlebih dahulu?</label><textarea id="r4" placeholder="Urutkan langkahmu..."></textarea></div>
+          <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+            <button class="btn primary" onclick="Refl.save()">Simpan Refleksi</button>
+            <button class="btn" onclick="Refl.export()">Unduh (.txt)</button>
+            <button class="btn ghost" onclick="Refl.clear()">Kosongkan</button>
+            <span class="small muted" id="reflStatus" style="align-self:center"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== 12. CLOSING ========== -->
+      <section class="section" id="sec-penutup" data-title="Penutup" data-sub="Learning Outcome Mapping">
+        <div class="sec-head">
+          <div><div class="kicker">Wrap Up</div><h2>LEARNING OUTCOME MAPPING</h2></div>
+          <div class="tag">Penutup</div>
+        </div>
+
+        <div class="card">
+          <h3>Pemetaan Aktivitas → Skill</h3>
+          <table>
+            <thead><tr><th>Activity</th><th>Skill Developed</th><th style="width:120px">Kategori</th></tr></thead>
+            <tbody id="loBody"></tbody>
+          </table>
+        </div>
+
+        <div class="grid g4">
+          <div class="card tight"><div class="badge">KNOWLEDGE</div><h4 style="margin-top:.4rem">Component &amp; measurement fundamentals</h4><p class="small muted" style="margin:0">Pasif/aktif, simbol, satuan, cara ukur V/A/Ω.</p></div>
+          <div class="card tight"><div class="badge">SKILL</div><h4 style="margin-top:.4rem">Assembly, soldering, measurement</h4><p class="small muted" style="margin:0">Breadboard, solder joint, pembacaan AVO.</p></div>
+          <div class="card tight"><div class="badge">PROBLEM SOLVING</div><h4 style="margin-top:.4rem">Troubleshooting &amp; analysis</h4><p class="small muted" style="margin:0">Ukur bertahap, bandingkan teori vs hasil.</p></div>
+          <div class="card tight"><div class="badge">ATTITUDE</div><h4 style="margin-top:.4rem">Safety, discipline, teamwork, responsibility</h4><p class="small muted" style="margin:0">K3, 5R, kontrak kuliah, integritas.</p></div>
+        </div>
+
+        <div class="hero" style="background:linear-gradient(135deg,#0b1424 0%,#16304f 60%,#1f4d7a 100%);text-align:center">
+          <h1 style="font-size:clamp(1.6rem,4vw,2.6rem);line-height:1.1">DON'T JUST BUILD IT.</h1>
+          <h1 style="font-size:clamp(1.6rem,4vw,2.6rem);line-height:1.1;color:var(--accent)">UNDERSTAND IT.</h1>
+          <p class="sub" style="margin:1rem auto 0;max-width:52ch;color:#cfe0f5">"Good electronics engineers don't guess.<br>They observe, measure, analyze, and solve."</p>
+          <div class="hero-meta" style="justify-content:center">
+            <span class="pill amber">NEXT STEP</span>
+            <span class="pill">Pertemuan 2 — Basic Electronics Workshop &amp; Component Identification</span>
+          </div>
+        </div>
+
+        <div class="card center">
+          <h3>Pertemuan 1 selesai</h3>
+          <p class="muted">Pastikan meja kerja rapi (5R), soldering iron di stand &amp; mati, power supply OFF, dan semua alat kembali ke tempatnya.</p>
+          <div style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap">
+            <button class="btn amber" onclick="go('refleksi')">Isi Refleksi</button>
+            <button class="btn" onclick="go('overview')">Kembali ke Overview</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- nav footer -->
+      <div class="navfoot">
+        <button class="btn" id="btnPrev">← Sebelumnya</button>
+        <div class="hint">Keyboard: <b>←</b> / <b>→</b> pindah sesi · <b>Space</b> tampilkan/sembunyikan kunci jawaban</div>
+        <button class="btn primary" id="btnNext">Selanjutnya →</button>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<button class="fab" id="fabLec">
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+  LECTURER CONTROL
+</button>
+<div class="overlay" id="overlay"></div>
+
+<aside class="drawer" id="drawer">
+  <header>
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+    <h3>LECTURER CONTROL</h3>
+    <div style="flex:1"></div>
+    <button class="btn sm ghost" style="color:#fff;border-color:rgba(255,255,255,.4)" id="btnCloseDrawer">Tutup</button>
+  </header>
+  <div class="dbody">
+    <h4 style="margin:0 0 .2rem">Today's Learning Flow</h4>
+    <p class="small muted" style="margin:0 0 .6rem">Centang setiap sesi selesai. Klik ikon ▶ untuk menjalankan timer sesi.</p>
+    <div id="lecList"></div>
+    <div class="tot"><span>TOTAL</span><span class="v" id="lecTotal">240 minutes</span></div>
+    <p class="small muted" style="margin:.5rem 0 0">Rincian sesi berjumlah 270 menit; selisih 30 menit adalah transisi &amp; instruksi lisan. Untuk tepat 240 menit: Components 45→40, Soldering 30→25, Multimeter 30→25, Mini Challenge 25→20.</p>
+
+    <h4 style="margin:1.2rem 0 .4rem">Class Snapshot</h4>
+    <table>
+      <tbody>
+        <tr><td>Progress materi</td><td><b id="lecProg">0%</b></td></tr>
+        <tr><td>Skor Matrikulasi</td><td><b id="lecMat">—</b></td></tr>
+        <tr><td>Skor K3</td><td><b id="lecK3">—</b></td></tr>
+        <tr><td>Skor Komponen</td><td><b id="lecComp">—</b></td></tr>
+        <tr><td>Skenario attitude</td><td><b id="lecScn">—</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="dfoot">
+    <button class="btn amber" onclick="Lecturer.print()">Cetak / PDF</button>
+    <button class="btn" onclick="Lecturer.uncheckAll()">Uncheck All</button>
+    <button class="btn" style="border-color:var(--bad-line);color:var(--bad)" onclick="App.reset()">Reset Semua Progress</button>
+  </div>
+</aside>
+
+<script>
+/* =====================================================================
+   1. SECTIONS
+   ===================================================================== */
+const SECTIONS = [
+  {id:'overview',    label:'Overview'},
+  {id:'matrikulasi', label:'Matrikulasi'},
+  {id:'kontrak',     label:'Contract'},
+  {id:'attitude',    label:'Workshop Attitude'},
+  {id:'k3',          label:'K3'},
+  {id:'komponen',    label:'Components'},
+  {id:'workflow',    label:'Workflow'},
+  {id:'soldering',   label:'Soldering'},
+  {id:'multimeter',  label:'Multimeter'},
+  {id:'challenge',   label:'Mini Challenge'},
+  {id:'refleksi',    label:'Reflection'},
+  {id:'penutup',     label:'Penutup'}
+];
+
+const SESSIONS = [
+  {n:'Matrikulasi',            d:30, sec:'matrikulasi'},
+  {n:'Contract & Attitude',    d:30, sec:'kontrak'},
+  {n:'K3',                     d:40, sec:'k3'},
+  {n:'Components',             d:45, sec:'komponen'},
+  {n:'Workflow',               d:30, sec:'workflow'},
+  {n:'Soldering',              d:30, sec:'soldering'},
+  {n:'Multimeter',             d:30, sec:'multimeter'},
+  {n:'Mini Challenge',         d:25, sec:'challenge'},
+  {n:'Reflection',             d:10, sec:'refleksi'}
+];
+
+const CONTRACT = [
+  'Kehadiran: hadir 100% atau sesuai ketentuan; izin disampaikan sebelum praktikum.',
+  'Ketepatan waktu: masuk workshop 10 menit sebelum sesi dimulai.',
+  'Kesiapan sebelum praktikum: baca job sheet & bawa alat tulis, kalkulator, APD.',
+  'Kelengkapan alat dan bahan: cek BOM sebelum mulai, laporkan kekurangan di awal.',
+  'Pengumpulan pekerjaan: tepat waktu, sesuai format laporan yang diminta.',
+  'Kebersihan meja kerja: 5R diterapkan sebelum dan sesudah praktikum.',
+  'Dokumentasi pekerjaan: foto/data ukur/laporan disimpan rapi dan jujur.',
+  'Integritas akademik: tidak menjiplak data ukur; data fiktif = nilai 0.',
+  'Larangan penggunaan alat tanpa izin: soldering station, power supply, bor, dsb.',
+  'Prosedur kerusakan alat: hentikan pemakaian → beri tanda → lapor instruktur.'
+];
+
+const FIVER = [
+  ['Ringkas','Pilah barang; simpan hanya yang diperlukan di meja kerja.'],
+  ['Rapi','Setiap alat punya tempat tetap dan diberi label.'],
+  ['Resik','Bersihkan meja dari sisa potongan kawat, timah, dan flux.'],
+  ['Rawat','Cek kondisi alat secara berkala; laporkan yang rusak.'],
+  ['Rajin','Biasakan 5R sebagai rutinitas, bukan saat dosen melihat saja.']
+];
+
+const ATTITUDES = [
+  'Safety first','Work carefully','Ask before guessing','Measure before replacing',
+  'Don’t force components','Keep workspace organized','Record your findings','Learn from mistakes'
+];
+
+const K3 = {
+  elec:[
+    'Jangan bekerja pada rangkaian bertegangan tanpa prosedur yang benar.',
+    'Pastikan sumber tegangan sesuai dengan spesifikasi rangkaian.',
+    'Periksa polaritas sebelum power ON.',
+    'Hindari short circuit — periksa wiring sebelum menyalakan.',
+    'Gunakan alat ukur dengan mode yang benar.',
+    'Jangan mengukur resistance pada rangkaian yang sedang bertegangan.'
+  ],
+  solder:[
+    'Soldering iron memiliki temperatur tinggi (300–400 °C).',
+    'Jangan menyentuh ujung solder.',
+    'Gunakan soldering stand — jangan taruh di meja.',
+    'Pastikan ventilasi baik; jangan hirup asap flux langsung.',
+    'Jangan meninggalkan solder dalam kondisi ON.',
+    'Hati-hati terhadap timah solder dan flux; cuci tangan setelah praktik.'
+  ],
+  work:[
+    'Meja kerja harus bersih dan kering.',
+    'Kabel tidak boleh berserakan di lantai.',
+    'Gunakan alat sesuai fungsinya.',
+    'Laporkan alat rusak segera — jangan gunakan.',
+    'Jangan bercanda saat menggunakan alat tajam/panas.',
+    'Gunakan APD jika diperlukan (kacamata, sarung tangan, masker).'
+  ]
+};
+
+const EMERGENCY = [
+  ['INCIDENT','Terjadi kejadian: korsleting, komponen meletus, asap, luka.'],
+  ['STOP WORK','Hentikan semua aktivitas. Jangan panik, jangan lari.'],
+  ['DISCONNECT POWER','Putuskan sumber tegangan — cabut/Off-kan power supply.'],
+  ['INFORM INSTRUCTOR','Laporkan ke instruktur/teknisi laboratorium.'],
+  ['ASSESS CONDITION','Periksa kondisi: korban, peralatan, area sekitar.'],
+  ['TAKE APPROPRIATE ACTION','P3K bila ada korban; isolasi area; catat kejadian.']
+];
+
+const K3CHECK = [
+  'Meja kerja kering, bersih, dan tidak ada cairan.',
+  'APD tersedia dan digunakan sesuai kebutuhan.',
+  'Kabel dan probe multimeter tidak terkelupas.',
+  'Power supply dalam kondisi OFF sebelum wiring.',
+  'Soldering iron di stand dan tidak menyentuh kabel.',
+  'Ventilasi ruang berfungsi.',
+  'Kotak P3K dan jalur evakuasi tidak terhalang.',
+  'Daftar hadir & kontrak K3 sudah ditandatangani.'
+];
+
+const WORKFLOW = [
+  ['UNDERSTAND','Apa fungsi rangkaian? Apa spesifikasinya?'],
+  ['DESIGN','Buat schematic & hitung nilai komponen.'],
+  ['PREPARE','Siapkan component, PCB/breadboard, wire, solder, tools, alat ukur.'],
+  ['ASSEMBLY','Pasang komponen sesuai schematic & urutan yang benar.'],
+  ['INSPECTION','Periksa polarity, wiring, solder joint, short circuit, orientasi.'],
+  ['POWER ON','Nyalakan dengan prosedur aman: mulai tegangan rendah.'],
+  ['MEASURE','Gunakan multimeter/AVO sesuai mode & range.'],
+  ['ANALYZE','Bandingkan hasil pengukuran dengan perhitungan teori.'],
+  ['TROUBLESHOOT','Cari sumber masalah secara sistematis, bertahap.'],
+  ['IMPROVE','Perbaiki, uji ulang, dokumentasikan.']
+];
+
+const POWERCHK = [
+  'Polaritas sumber sudah dicek (VCC/GND atau +/−).',
+  'Tidak ada sambungan timah yang menjembatani dua jalur (solder bridge).',
+  'Tidak ada kaki komponen yang terbalik (LED, elco, diode, IC).',
+  'Tidak ada kawat/timah sisa yang berpotensi short.',
+  'Nilai resistor pembatas arus sudah dihitung ulang.',
+  'Multimeter diset ke mode V DC dan probe di jack V/Ω.',
+  'Arus awal dibatasi (current limit pada power supply diset).',
+  'Semua anggota kelompok berada pada jarak aman & siap memantau.'
+];
+
+const SOLDER_STEPS = [
+  'Kenali soldering iron: gagang, elemen pemanas, ujung (tip), stand.',
+  'Bersihkan tip dengan spons basah / brass wool sebelum digunakan.',
+  'Panaskan joint — tempelkan ujung solder ke pertemuan kaki komponen dan pad PCB (±1–2 detik).',
+  'Masukkan solder secukupnya ke joint yang panas (bukan ke ujung solder).',
+  'Lepaskan solder terlebih dahulu.',
+  'Lepaskan soldering iron, kembali ke stand.',
+  'Biarkan joint dingin tanpa digerakkan (±2–3 detik).',
+  'Inspeksi hasil solder: mengkilap, tidak bridge, tidak cold.'
+];
+
+const SOLDER_CHK = [
+  'Joint mengkilap / terbentuk baik',
+  'Tidak terjadi solder bridge',
+  'Tidak ada cold solder joint',
+  'Komponen tidak rusak karena panas',
+  'Jalur PCB tidak terangkat'
+];
+
+const TS = [
+  'Apakah power supply ON?',
+  'Apakah tegangan sesuai?',
+  'Apakah wiring benar?',
+  'Apakah LED terbalik?',
+  'Apakah resistor terpasang?',
+  'Apakah ada short circuit?',
+  'Apakah komponen rusak?'
+];
+
+const LO = [
+  ['Matrikulasi','Baseline knowledge','KNOWLEDGE'],
+  ['Contract','Professional attitude','ATTITUDE'],
+  ['K3','Safety awareness','ATTITUDE'],
+  ['Components','Component recognition','KNOWLEDGE'],
+  ['Workflow','Engineering process','KNOWLEDGE'],
+  ['Soldering','Assembly skill','SKILL'],
+  ['Multimeter','Measurement skill','SKILL'],
+  ['Mini Challenge','Problem solving','PROBLEM SOLVING'],
+  ['Reflection','Self-assessment','ATTITUDE']
+];
+
+/* =====================================================================
+   2. COMPONENT DATA
+   ===================================================================== */
+const SYM = {
+  resistor:`<svg viewBox="0 0 120 60"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30h16"/><path d="M22 30 l8 -14 l12 28 l12 -28 l12 28 l12 -28 l8 14"/><path d="M86 30h28"/></g></svg>`,
+  capacitor:`<svg viewBox="0 0 120 60"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 30h40"/><path d="M46 12v36"/><path d="M62 12v36"/><path d="M62 30h52"/></g></svg>`,
+  inductor:`<svg viewBox="0 0 120 60"><g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 30h18"/><path d="M24 30 a10 10 0 0 1 20 0 a10 10 0 0 1 20 0 a10 10 0 0 1 20 0 a10 10 0 0 1 20 0"/><path d="M104 30h10"/></g></svg>`,
+  diode:`<svg viewBox="0 0 120 60"><g stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30h32" fill="none"/><path d="M38 14 L70 30 L38 46 Z" fill="currentColor"/><path d="M70 12v36" fill="none"/><path d="M70 30h44" fill="none"/></g></svg>`,
+  led:`<svg viewBox="0 0 120 60"><g stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 30h32" fill="none"/><path d="M38 14 L70 30 L38 46 Z" fill="currentColor"/><path d="M70 12v36" fill="none"/><path d="M70 30h44" fill="none"/><path d="M74 8 l14 -6 M84 10 l12 -4" stroke-width="2.4" fill="none"/></g><g fill="currentColor" stroke="none"><path d="M88 2 l4 6 -8 0 z" transform="rotate(0)"/><path d="M96 6 l4 6 -8 0 z"/></g></svg>`,
+  transistor:`<svg viewBox="0 0 120 60"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="58" cy="30" r="26"/><path d="M50 19v22"/><path d="M18 30h32"/><path d="M50 26 L86 13"/><path d="M50 34 L86 47"/></g><path d="M82 44 L90 50 L79 50 Z" fill="currentColor"/></svg>`,
+  ic:`<svg viewBox="0 0 120 60"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><rect x="30" y="10" width="60" height="40" rx="3"/><path d="M6 20h24M6 30h24M6 40h24"/><path d="M90 20h24M90 30h24M90 40h24"/></g></svg>`,
+  // physical appearance
+  p_resistor:`<svg viewBox="0 0 120 60"><g stroke="currentColor" fill="none" stroke-width="2.4"><path d="M4 30h20M96 30h20"/><path d="M24 22 q10 -8 20 0 q10 8 20 0 q10 -8 20 0 q10 8 8 0 l0 16 q-2 8 -8 0 q-10 -8 -20 0 q-10 8 -20 0 q-10 -8 -20 0 q-10 8 -20 0 z" fill="#f3d9a4" stroke="#8a6a2f"/></g><g fill="#8b1a1a"><rect x="40" y="20" width="5" height="20"/><rect x="52" y="20" width="5" height="20"/><rect x="64" y="20" width="5" height="20"/></g><rect x="78" y="20" width="5" height="20" fill="#c9a227"/></svg>`,
+  p_capacitor:`<svg viewBox="0 0 120 60"><rect x="34" y="12" width="46" height="36" rx="5" fill="#2f5fa8" stroke="currentColor" stroke-width="2.4"/><path d="M34 16 v28" stroke="#dbeafe" stroke-width="3"/><path d="M8 24h26M8 36h26" stroke="currentColor" stroke-width="2.6" fill="none"/><path d="M80 24h32M80 36h32" stroke="currentColor" stroke-width="2.6" fill="none"/><path d="M46 16 v6" stroke="#fff" stroke-width="2"/></svg>`,
+  p_inductor:`<svg viewBox="0 0 120 60"><g stroke="currentColor" stroke-width="2.4" fill="none"><path d="M6 30h16M98 30h16"/><ellipse cx="60" cy="30" rx="26" ry="16" fill="#b98a3e"/><path d="M44 20 q16 -6 32 0 M44 30 q16 -6 32 0 M44 40 q16 -6 32 0"/></g></svg>`,
+  p_diode:`<svg viewBox="0 0 120 60"><g stroke="currentColor" stroke-width="2.4" fill="none"><path d="M6 30h26M88 30h26"/></g><rect x="32" y="20" width="56" height="20" rx="3" fill="#3b3b3b" stroke="currentColor" stroke-width="2.4"/><rect x="76" y="20" width="8" height="20" fill="#e5e7eb"/></svg>`,
+  p_led:`<svg viewBox="0 0 120 60"><g stroke="currentColor" stroke-width="2.6" fill="none"><path d="M10 42h16M92 42h16"/></g><path d="M42 44 a24 24 0 0 1 36 0 z" fill="#dc2626" stroke="currentColor" stroke-width="2.4"/><rect x="40" y="42" width="40" height="5" rx="2" fill="#ef4444" stroke="currentColor" stroke-width="2"/><g stroke="#fbbf24" stroke-width="2"><path d="M60 12v-8M46 16l-6-6M74 16l6-6"/></g></svg>`,
+  p_transistor:`<svg viewBox="0 0 120 60"><path d="M40 14 h44 a6 6 0 0 1 6 6 v20 a6 6 0 0 1 -6 6 h-44 a6 6 0 0 1 -6 -6 v-20 a6 6 0 0 1 6 -6 z" fill="#1f2937" stroke="currentColor" stroke-width="2.4"/><g stroke="currentColor" stroke-width="3" fill="none"><path d="M22 22h14M22 32h14M22 42h14"/></g><g fill="#d1d5db" font-size="0"><rect x="46" y="18" width="30" height="3" rx="1.5"/></g></svg>`,
+  p_ic:`<svg viewBox="0 0 120 60"><rect x="26" y="12" width="68" height="36" rx="3" fill="#111827" stroke="currentColor" stroke-width="2.4"/><circle cx="38" cy="20" r="4" fill="#374151"/><g stroke="currentColor" stroke-width="3" fill="none"><path d="M8 20h18M8 30h18M8 40h18M94 20h18M94 30h18M94 40h18"/></g><g fill="#e5e7eb"><rect x="50" y="20" width="26" height="2"/><rect x="50" y="26" width="26" height="2"/><rect x="50" y="32" width="26" height="2"/></g></svg>`
+};
+
+const COMPS = [
+  {k:'resistor', n:'Resistor', en:'RESISTOR', type:'pasif', fn:'Membatasi arus, pembagi tegangan, biasing',
+   par:'Resistance (Ω) · Power rating (W) · Tolerance (%)', app:'Pembatas arus LED, divider sensor, pull-up/pull-down'},
+  {k:'capacitor', n:'Kapasitor', en:'CAPACITOR', type:'pasif', fn:'Filtering, coupling, energy storage',
+   par:'Capacitance (F) · Voltage rating (V)', app:'Filter catu daya, kopling audio, decoupling IC'},
+  {k:'inductor', n:'Induktor', en:'INDUCTOR', type:'pasif', fn:'Energy storage, filtering, aplikasi elektromagnetik',
+   par:'Inductance (H) · Current rating (A)', app:'Filter switching PSU, relay coil, trafo'},
+  {k:'diode', n:'Dioda', en:'DIODE', type:'aktif', fn:'Rectification, protection, switching',
+   par:'Forward voltage (Vf) · Current rating (If) · PIV', app:'Penyearah, flyback relay, proteksi polaritas'},
+  {k:'led', n:'LED', en:'LIGHT EMITTING DIODE', type:'aktif', fn:'Indicator, light emission',
+   par:'Vf (V) · If (mA) · warna/intensitas', app:'Indikator status, seven segment, lampu panel'},
+  {k:'transistor', n:'Transistor', en:'TRANSISTOR (BJT/MOSFET)', type:'aktif', fn:'Switching, amplification',
+   par:'hFE / Vgs(th) · VCE max · IC max', app:'Driver relay, saklar elektronik, penguat sinyal'},
+  {k:'ic', n:'IC', en:'INTEGRATED CIRCUIT', type:'aktif', fn:'Processing, control, amplification, interface',
+   par:'Tegangan kerja · jenis kemasan (DIP/SMD) · pinout', app:'Op-amp, regulator 7805, timer 555, mikrokontroler'}
+];
+
+const BANDS = [
+  {c:'#1f2937', n:'Hitam', v:0},
+  {c:'#7c3f16', n:'Coklat', v:1},
+  {c:'#dc2626', n:'Merah', v:2},
+  {c:'#f97316', n:'Orange', v:3},
+  {c:'#eab308', n:'Kuning', v:4},
+  {c:'#16a34a', n:'Hijau', v:5},
+  {c:'#2563eb', n:'Biru', v:6},
+  {c:'#7c3aed', n:'Ungu', v:7},
+  {c:'#6b7280', n:'Abu-abu', v:8},
+  {c:'#ffffff', n:'Putih', v:9}
+];
+const MULT = [
+  {c:'#1f2937', n:'Hitam', m:1, t:'×1'},
+  {c:'#7c3f16', n:'Coklat', m:10, t:'×10'},
+  {c:'#dc2626', n:'Merah', m:100, t:'×100'},
+  {c:'#f97316', n:'Orange', m:1000, t:'×1 k'},
+  {c:'#eab308', n:'Kuning', m:10000, t:'×10 k'},
+  {c:'#16a34a', n:'Hijau', m:100000, t:'×100 k'},
+  {c:'#2563eb', n:'Biru', m:1000000, t:'×1 M'}
+];
+const TOL = [
+  {c:'#7c3f16', n:'Coklat', t:'±1%'},
+  {c:'#dc2626', n:'Merah', t:'±2%'},
+  {c:'#eab308', n:'Kuning', t:'±5%'},
+  {c:'#c0c0c0', n:'Silver', t:'±10%'},
+  {c:'#d4a017', n:'Gold', t:'±5%'}
+];
+
+/* =====================================================================
+   3. QUIZZES
+   ===================================================================== */
+const QUIZZES = {
+  mat:{
+    title:'Baseline',
+    q:[
+      {t:'Bahasa Indonesia — Antonim dari kata "meningkatkan" adalah…',
+       o:['menurunkan','mengembangkan','memperbesar','mempertahankan'], a:0,
+       e:'meningkatkan ↔ menurunkan.'},
+      {t:'Bahasa Indonesia — Kalimat efektif yang tepat:',
+       o:['Rangkaian tersebut telah selesai dirakit oleh saya.','Saya telah merakit rangkaian tersebut.','Telah selesai saya rakit rangkaian tersebut.','Oleh saya rangkaian itu telah dirakit.'], a:1,
+       e:'Kalimat efektif: subjek + predikat jelas → "Saya telah merakit rangkaian tersebut."'},
+      {t:'Matematika dasar — 1 kΩ sama dengan…',
+       o:['100 Ω','1 000 Ω','10 000 Ω','0,1 Ω'], a:1,
+       e:'kilo = 10³ → 1 kΩ = 1 000 Ω.'},
+      {t:'Matematika dasar — Jika Vs = 5 V dan R = 1 kΩ, arus I = …',
+       o:['5 mA','0,5 mA','50 mA','500 µA'], a:0,
+       e:'I = V / R = 5 / 1000 = 0,005 A = 5 mA.'},
+      {t:'Logika gambar — Urutan yang benar sebelum menyalakan rangkaian: (1) cek polaritas (2) cek wiring (3) power ON (4) ukur tegangan',
+       o:['1-2-3-4','3-1-2-4','2-3-1-4','1-3-2-4'], a:0,
+       e:'Cek polaritas → cek wiring → baru power ON → lalu ukur.'},
+      {t:'Logika — LED tidak menyala, tegangan suplai terukur 0 V. Dugaan pertama yang paling masuk akal:',
+       o:['LED rusak','Resistor salah nilai','Power supply belum ON / kabel putus','Multimeter rusak'], a:2,
+       e:'Ukur sumber dulu: 0 V berarti masalah ada di suplai atau kabel, bukan di LED.'},
+      {t:'English — "Soldering iron" dalam Bahasa Indonesia adalah…',
+       o:['Tang potong','Obeng','Besi solder','Multimeter'], a:2,
+       e:'soldering iron = besi solder.'},
+      {t:'English — "Measure the voltage across the resistor" berarti…',
+       o:['Ukur arus yang lewat resistor','Ukur tegangan pada kedua ujung resistor','Ukur hambatan resistor','Lepas resistor lalu ukur'], a:1,
+       e:'across = pada kedua ujung → pengukuran tegangan secara paralel.'}
+    ]
+  },
+  k3:{
+    title:'K3',
+    q:[
+      {t:'Apa yang dilakukan sebelum mengukur resistance?',
+       o:['Pastikan rangkaian tidak bertegangan (power OFF)','Tambah tegangan agar bacaan stabil','Ukur pada range terkecil','Hubung-singkatkan kedua probe'],
+       a:0, e:'Resistance diukur pada rangkaian TIDAK bertegangan. Melepas salah satu kaki komponen memberi hasil paling akurat.'},
+      {t:'Apa yang dilakukan pertama kali ketika terjadi short circuit?',
+       o:['Menyiram dengan air','Segera putuskan sumber tegangan lalu laporkan instruktur','Mengganti semua komponen','Meniup asap sampai hilang'],
+       a:1, e:'STOP WORK → DISCONNECT POWER → INFORM INSTRUCTOR. Jangan sentuh rangkaian sebelum sumber dilepas.'},
+      {t:'Di mana soldering iron harus diletakkan saat tidak digunakan?',
+       o:['Di atas PCB','Di soldering stand','Di pangkuan','Di lantai dekat meja'],
+       a:1, e:'Selalu di soldering stand. Meletakkan di meja berisiko membakar kabel dan meja.'},
+      {t:'Mengapa polaritas harus diperiksa sebelum power ON?',
+       o:['Agar warna kabel rapi','Salah polaritas dapat merusak komponen (elco, LED, IC) dan memicu panas/letusan','Agar arus lebih besar','Supaya multimeter lebih akurat'],
+       a:1, e:'Komponen polar (elco, LED, diode, IC) dapat rusak permanen atau meletus jika polaritas terbalik.'},
+      {t:'Apa tindakan pertama ketika alat workshop mengalami kerusakan?',
+       o:['Perbaiki sendiri diam-diam','Hentikan pemakaian, beri tanda "RUSAK", laporkan instruktur','Pinjam ke kelompok lain tanpa lapor','Terus gunakan sampai praktikum selesai'],
+       a:1, e:'Jangan gunakan alat rusak. Isolasi, beri label, lalu lapor — ini bagian dari kontrak kuliah.'}
+    ]
+  },
+  comp:{
+    title:'Komponen',
+    q:[
+      {t:'Komponen pasif yang berfungsi membatasi arus adalah…',
+       o:['Kapasitor','Resistor','Dioda','Transistor'], a:1, e:'Resistor membatasi arus (dan sebagai pembagi tegangan / biasing).'},
+      {t:'Komponen yang hanya mengalirkan arus satu arah:',
+       o:['Resistor','Kapasitor','Dioda','Induktor'], a:2, e:'Dioda: konduksi saat forward bias, menahan saat reverse bias.'},
+      {t:'Komponen yang menyimpan energi dalam medan listrik:',
+       o:['Induktor','Kapasitor','Resistor','LED'], a:1, e:'Kapasitor menyimpan energi pada medan listrik; induktor pada medan magnet.'},
+      {t:'Fungsi utama transistor dalam rangkaian digital:',
+       o:['Sebagai saklar (switching)','Sebagai penyimpan energi','Sebagai penyearah','Sebagai indikator'], a:0, e:'Transistor dipakai sebagai switching dan amplification.'},
+      {t:'Kapasitor elektrolit (elco) memiliki…',
+       o:['Tidak ada polaritas','Polaritas (+ / −) yang harus benar','Tiga kaki','Nilai tetap tanpa toleransi'], a:1, e:'Elco berkutub: kaki panjang = (+), strip di badan menandai (−).'}
+    ]
+  }
+};
+
+const SCENARIOS = [
+  {t:'Scenario A', d:'Mahasiswa langsung menyalakan power supply tanpa mengecek wiring.', good:false,
+   e:'BAD PRACTICE — INSPECTION sebelum POWER ON adalah langkah wajib. Short circuit bisa merusak power supply dan komponen dalam sekejap.'},
+  {t:'Scenario B', d:'Mahasiswa mengecek wiring menggunakan multimeter sebelum power ON.', good:true,
+   e:'GOOD PRACTICE — ukur kontinuitas/hambatan dulu (power OFF), pastikan tidak ada short, baru nyalakan.'},
+  {t:'Scenario C', d:'Mahasiswa melihat rangkaian tidak bekerja lalu mengganti semua komponen sekaligus.', good:false,
+   e:'BAD PRACTICE — "shotgun troubleshooting". Anda kehilangan informasi penyebab, dan komponen yang sehat ikut terbuang.'},
+  {t:'Scenario D', d:'Mahasiswa melakukan pengukuran bertahap untuk mencari sumber masalah.', good:true,
+   e:'GOOD PRACTICE — bagi sistem jadi bagian kecil: suplai → input → proses → output. Ukur, catat, lalu simpulkan.'}
+];
+
+/* =====================================================================
+   4. STATE
+   ===================================================================== */
+const KEY = 'bengkel_elektronika_p1_v1';
+const State = {
+  data:{ visited:[], checks:{}, quiz:{}, scen:{}, lec:[], refl:{} },
+  load(){ try{ const s = localStorage.getItem(KEY); if(s) this.data = Object.assign(this.data, JSON.parse(s)); }catch(e){} },
+  save(){ try{ localStorage.setItem(KEY, JSON.stringify(this.data)); }catch(e){} }
+};
+
+/* =====================================================================
+   5. RENDER HELPERS
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const el = (tag, cls, html) => { const e = document.createElement(tag); if(cls) e.className = cls; if(html!=null) e.innerHTML = html; return e; };
+
+function buildMenu(){
+  const m = $('#menu');
+  SECTIONS.forEach((s,i)=>{
+    const b = el('button','nav-item'+(i===0?' active':''),
+      `<span class="num">${String(i+1).padStart(2,'0')}</span><span class="lab">${s.label}</span>`);
+    b.dataset.id = s.id; b.onclick = ()=>go(s.id); m.appendChild(b);
+  });
+}
+function buildRoadmap(){
+  const tb = $('#roadmapBody');
+  SESSIONS.forEach((s,i)=>{
+    tb.appendChild(el('tr','',`<td>${String(i+1).padStart(2,'0')}</td><td>${s.n}</td><td class="mono">${s.d} min</td>`));
+  });
+  tb.appendChild(el('tr','',`<td></td><td><b>Total JP</b></td><td class="mono"><b>240 min</b></td>`));
+}
+function buildContract(){
+  const cb = $('#contractBody');
+  CONTRACT.forEach((c,i)=>cb.appendChild(el('tr','',`<td>${i+1}</td><td>${c}</td>`)));
+  const fr = $('#fiveR');
+  FIVER.forEach((f,i)=>{
+    fr.appendChild(el('div','card tight',`<div style="display:flex;gap:.6rem;align-items:center"><div style="width:28px;height:28px;flex:0 0 28px;border-radius:8px;background:var(--accent);color:#33200a;display:grid;place-items:center;font-weight:800">${i+1}</div><div><b>${f[0]}</b><div class="small muted">${f[1]}</div></div></div>`));
+  });
+  const al = $('#attitudeList');
+  ATTITUDES.forEach(a=>al.appendChild(el('li','',a)));
+}
+function buildK3(){
+  ['elec','solder','work'].forEach(k=>{
+    const ul = $('#k3'+k.charAt(0).toUpperCase()+k.slice(1));
+    K3[k].forEach(t=>ul.appendChild(el('li','',t)));
+  });
+  const f = $('#emergencyFlow');
+  EMERGENCY.forEach((e,i)=>{
+    if(i) f.appendChild(el('div','arw','↓'));
+    f.appendChild(el('div','fbox'+(i===2?' danger':(i===5?' go':'')), `<div>${e[0]}</div><div class="small muted" style="font-weight:400">${e[1]}</div>`));
+  });
+  buildChecklist('#k3Check','k3',K3CHECK,'#k3Prog');
+}
+function buildChecklist(sel, group, items, progSel){
+  const box = $(sel); box.innerHTML='';
+  items.forEach((t,i)=>{
+    const id = group+'-'+i;
+    const lab = el('label','check'+(State.data.checks[id]?' done':''),
+      `<input type="checkbox" ${State.data.checks[id]?'checked':''}><span>${t}</span>`);
+    lab.querySelector('input').onchange = (ev)=>{
+      State.data.checks[id] = ev.target.checked;
+      lab.classList.toggle('done', ev.target.checked);
+      State.save(); updateCheckProgress(group, items.length, progSel);
+    };
+    box.appendChild(lab);
+  });
+  updateCheckProgress(group, items.length, progSel);
+}
+function updateCheckProgress(group, total, progSel){
+  if(!progSel) return;
+  let c=0; for(let i=0;i<total;i++) if(State.data.checks[group+'-'+i]) c++;
+  $(progSel).textContent = c+'/'+total;
+}
+function buildComponents(){
+  const g = $('#compGrid');
+  COMPS.forEach(c=>{
+    const card = el('div','comp',`
+      <div class="top">${SYM[c.k]}<div><div class="nm">${c.n}</div><div class="en">${c.en}</div></div></div>
+      <div class="body">
+        <div style="margin-bottom:.4rem"><span class="badge ${c.type}">${c.type.toUpperCase()}</span></div>
+        <div class="row"><span class="k">Simbol</span><span>${SYM[c.k].replace('<svg','<svg style="width:52px;height:26px;color:#1f3a5f;vertical-align:middle"')}</span></div>
+        <div class="row"><span class="k">Wujud fisik</span><span>${SYM['p_'+c.k].replace('<svg','<svg style="width:64px;height:32px;color:#334155;vertical-align:middle"')}</span></div>
+        <div class="row"><span class="k">Fungsi</span><span>${c.fn}</span></div>
+        <div class="row"><span class="k">Parameter</span><span>${c.par}</span></div>
+        <div class="row"><span class="k">Aplikasi</span><span class="muted">${c.app}</span></div>
+      </div>`);
+    card.dataset.type = c.type;
+    g.appendChild(card);
+  });
+}
+Comp = {
+  filter(t){
+    $$('#compGrid .comp').forEach(c=>{ c.style.display = (t==='all'||c.dataset.type===t)?'':'none'; });
+  }
+};
+function buildBands(){
+  const box = $('#bandPick');
+  const mk = (id, arr, idx, getLabel)=>{
+    const wrap = el('div','');
+    wrap.appendChild(el('label','small muted',`<b>${id}</b>`));
+    const sel = document.createElement('select');
+    sel.style.cssText='width:100%;padding:.4rem;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:.85rem';
+    arr.forEach((o,i)=>{ const op=document.createElement('option'); op.value=i; op.textContent=(i+1)+'. '+o.n+' ('+getLabel(o)+')'; sel.appendChild(op); });
+    sel.selectedIndex = idx;
+    sel.onchange = ()=>{ bandSel[id]=+sel.value; calcBand(); };
+    wrap.appendChild(sel); box.appendChild(wrap);
+  };
+  bandSel = {D1:1, D2:0, M:2, T:2};
+  mk('D1',BANDS,1,o=>o.v); mk('D2',BANDS,0,o=>o.v); mk('M',MULT,2,o=>o.t); mk('T',TOL,2,o=>o.t);
+  calcBand();
+}
+let bandSel = {D1:1,D2:0,M:2,T:2};
+function calcBand(){
+  const d1=BANDS[bandSel.D1].v, d2=BANDS[bandSel.D2].v, m=MULT[bandSel.M], t=TOL[bandSel.T];
+  const val = (d1*10+d2)*m.m;
+  $('#bandOut').textContent = fmtR(val)+'  ' + t.t;
+  $('#bandCalc').textContent = `(${d1} × 10 + ${d2}) × ${m.m} = ${val.toLocaleString('id-ID')} Ω`;
+}
+function fmtR(v){
+  if(v>=1e6) return (v/1e6).toString().replace('.',',')+' MΩ';
+  if(v>=1e3) return (v/1e3).toString().replace('.',',')+' kΩ';
+  return v.toString().replace('.',',')+' Ω';
+}
+function calcLed(){
+  const vs=+$('#ledVs').value, vf=+$('#ledVf').value, im=+$('#ledIf').value;
+  if(!(vs>0)||!(im>0)){ $('#ledOut').textContent='—'; return; }
+  const r=(vs-vf)/(im/1000);
+  if(r<=0){ $('#ledOut').textContent='Vs harus lebih besar dari Vf'; $('#ledNote').textContent=''; return; }
+  const e12=[1.0,1.2,1.5,1.8,2.2,2.7,3.3,3.9,4.7,5.6,6.8,8.2];
+  const dec = Math.pow(10, Math.floor(Math.log10(r)));
+  let std = 8.2*dec;
+  for(const n of e12){ const cand = n*dec; if(cand >= r - 1e-9){ std = cand; break; } }
+  $('#ledOut').textContent = 'R = '+fmtR(Math.round(r*10)/10)+'  → pakai '+fmtR(std);
+  $('#ledNote').textContent = 'Arus aktual dengan '+fmtR(std)+' ≈ '+(((vs-vf)/std)*1000).toFixed(1)+' mA (batas aman LED indikator < 20 mA).';
+}
+function buildWorkflow(){
+  const p = $('#pipe');
+  WORKFLOW.forEach((w,i)=>{
+    p.appendChild(el('div','step',`<div class="n">${i+1}</div><h4>${w[0]}</h4><p>${w[1]}</p>`));
+  });
+  buildChecklist('#pwCheck','pw',POWERCHK,null);
+  const ol = $('#solderSteps');
+  SOLDER_STEPS.forEach(s=>ol.appendChild(el('li','',s)));
+  buildChecklist('#soldCheck','sold',SOLDER_CHK,null);
+  buildChecklist('#tsCheck','ts',TS,'#tsProg');
+}
+function buildScenarios(){
+  const box = $('#scenarios');
+  SCENARIOS.forEach((s,i)=>{
+    const pick = State.data.scen[i];
+    const card = el('div','scen',`
+      <div class="st">${s.t}</div>
+      <div class="sd">"${s.d}"</div>
+      <div class="votes">
+        <button class="vote good ${pick===true?'picked':''}">GOOD PRACTICE</button>
+        <button class="vote bad ${pick===false?'picked':''}">BAD PRACTICE</button>
+      </div>
+      <div class="verdict ${s.good?'good':'bad'} ${pick!=null?'show':''}">${s.e}</div>`);
+    const [bg,bb] = card.querySelectorAll('.vote');
+    const vd = card.querySelector('.verdict');
+    bg.onclick = ()=>answerScen(i,true,card);
+    bb.onclick = ()=>answerScen(i,false,card);
+    box.appendChild(card);
+  });
+  let right = 0;
+  SCENARIOS.forEach((s,i)=>{ if(State.data.scen[i]===s.good) right++; });
+  updateScore('scn', null, SCENARIOS.length, '#scnScore','#scnBar', right);
+}
+function answerScen(i, ans, card){
+  State.data.scen[i] = ans; State.save();
+  const s = SCENARIOS[i];
+  card.querySelectorAll('.vote').forEach(v=>v.classList.remove('picked'));
+  card.querySelector(ans?'.vote.good':'.vote.bad').classList.add('picked');
+  card.querySelector('.verdict').classList.add('show');
+  let c=0; SCENARIOS.forEach((x,j)=>{ if(State.data.scen[j]===x.good) c++; });
+  updateScore('scn', null, SCENARIOS.length, '#scnScore','#scnBar', c);
+  Lecturer.snapshot();
+}
+function buildQuiz(key){
+  const q = QUIZZES[key], box = $('#'+key+'Quiz');
+  q.q.forEach((item,i)=>{
+    const answered = State.data.quiz[key] && State.data.quiz[key][i] != null;
+    const chosen = answered ? State.data.quiz[key][i] : null;
+    const card = el('div','q');
+    card.appendChild(el('div','qt',`<span class="qn">${i+1}</span><span>${item.t}</span>`));
+    const opts = el('div','opts');
+    item.o.forEach((o,j)=>{
+      const cls = 'opt'+(answered?' disabled':'')+(answered&&j===item.a?' correct':'')+(answered&&chosen===j&&j!==item.a?' wrong':'');
+      const b = el('div',cls,`<span class="key">${'ABCD'[j]}</span><span>${o}</span>`);
+      if(!answered) b.onclick = ()=>answerQ(key,i,j,card);
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+    const fb = el('div','fb '+(answered ? (chosen===item.a?'good':'bad') : 'good'), `<b>${answered?(chosen===item.a?'Benar. ':'Kurang tepat. '):''}</b>${item.e}`);
+    fb.classList.add('reveal');
+    if(answered) fb.classList.add('show');
+    card.appendChild(fb);
+    box.appendChild(card);
+  });
+  const ans = State.data.quiz[key]||{};
+  let c=0; Object.keys(ans).forEach(k=>{ if(ans[k]===q.q[k].a) c++; });
+  updateScore(key,null,q.q.length,'#'+key+'Score','#'+key+'Bar',c);
+}
+function answerQ(key,i,j,card){
+  if(!State.data.quiz[key]) State.data.quiz[key] = {};
+  State.data.quiz[key][i] = j; State.save();
+  const item = QUIZZES[key].q[i];
+  card.querySelectorAll('.opt').forEach((o,k)=>{
+    o.classList.add('disabled');
+    if(k===item.a) o.classList.add('correct');
+    else if(k===j) o.classList.add('wrong');
+    o.onclick = null;
+  });
+  const fb = card.querySelector('.fb');
+  fb.classList.toggle('bad', j!==item.a);
+  fb.classList.toggle('good', j===item.a);
+  fb.innerHTML = `<b>${j===item.a?'Benar. ':'Kurang tepat. '}</b>${item.e}`;
+  fb.classList.add('show');
+  const ans = State.data.quiz[key]||{};
+  let c=0; Object.keys(ans).forEach(k=>{ if(ans[k]===QUIZZES[key].q[k].a) c++; });
+  updateScore(key,null,QUIZZES[key].q.length,'#'+key+'Score','#'+key+'Bar',c);
+  Lecturer.snapshot();
+}
+function updateScore(key, arr, total, scoreSel, barSel, force){
+  let c = force;
+  if(c==null){
+    if(arr){ c = arr.reduce((a,b)=>a+b,0); }
+    else { const ans = State.data.quiz[key]||{}; c=0; Object.keys(ans).forEach(k=>{ if(ans[k]===QUIZZES[key].q[k].a) c++; }); }
+  }
+  $(scoreSel).textContent = c+'/'+total;
+  $(barSel).style.width = Math.round(c/total*100)+'%';
+  Lecturer.snapshot();
+}
+Quiz = {
+  reset(key){
+    if(key==='scn'){ State.data.scen = {}; State.save(); $('#scenarios').innerHTML=''; buildScenarios(); return; }
+    if(State.data.quiz[key]) delete State.data.quiz[key];
+    State.save(); $('#'+key+'Quiz').innerHTML=''; buildQuiz(key);
+  }
+};
+
+/* =====================================================================
+   6. TIMER
+   ===================================================================== */
+Timer = {
+  remaining: 30*60, running:false, iv:null,
+  set(min){ this.pause(); this.remaining = min*60; this.paint(); },
+  toggle(){ this.running ? this.pause() : this.start(); },
+  start(){ if(this.remaining<=0) return; this.running=true; $('#btnTimer').textContent='Pause';
+    this.iv = setInterval(()=>{ this.remaining--; this.paint(); if(this.remaining<=0){ this.pause(); this.paint(); } },1000); },
+  pause(){ this.running=false; $('#btnTimer').textContent='Start'; clearInterval(this.iv); },
+  paint(){
+    const m = Math.floor(Math.abs(this.remaining)/60), s = Math.abs(this.remaining)%60;
+    const txt = (this.remaining<0?'-':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    $('#timerLabel').textContent = txt;
+    const md = $('#matDisplay'); if(md) md.textContent = txt;
+    $('#timerChip').classList.toggle('warn', this.remaining<=60 && this.remaining>=0);
+  }
+};
+
+/* =====================================================================
+   7. REFLECTION
+   ===================================================================== */
+Refl = {
+  update(){
+    const b=+$('#confBefore').value, a=+$('#confAfter').value;
+    $('#confBeforeV').textContent=b; $('#confAfterV').textContent=a;
+    const d=a-b;
+    $('#confNote').innerHTML = `<b>Delta ${d>=0?'+':''}${d}</b> — ` + (d>0?'Ada peningkatan kepercayaan diri. Catat apa yang membuatmu lebih percaya diri.'
+      : d===0?'Tidak ada perubahan. Identifikasi satu hal yang masih mengganjal dan tanyakan pada instruktur.'
+      : 'Rasa percaya diri menurun — wajar. Workshop memang memperlihatkan banyak hal baru. Fokus pada satu keterampilan untuk dikuasai pekan depan.');
+    State.data.refl.confBefore=b; State.data.refl.confAfter=a; State.save();
+  },
+  save(){
+    State.data.refl = Object.assign(State.data.refl, {
+      r1:$('#r1').value, r2:$('#r2').value, r3:$('#r3').value, r4:$('#r4').value
+    });
+    State.save();
+    $('#reflStatus').textContent='Refleksi tersimpan di browser ini.';
+    setTimeout(()=>$('#reflStatus').textContent='',2600);
+  },
+  export(){
+    const r = State.data.refl||{};
+    const txt = `REFLEKSI — BENGKEL ELEKTRONIKA PERTEMUAN 01\nD3 Teknik Elektro Industri\nTanggal: ${new Date().toLocaleString('id-ID')}\n\n`+
+      `Confidence BEFORE: ${$('#confBefore').value}/5\nConfidence AFTER : ${$('#confAfter').value}/5\n\n`+
+      `1. Hal paling baru yang dipelajari:\n${r.r1||'-'}\n\n2. Bagian paling sulit:\n${r.r2||'-'}\n\n`+
+      `3. Alat yang ingin dipelajari lanjut:\n${r.r3||'-'}\n\n4. Langkah pertama jika rangkaian tidak bekerja:\n${r.r4||'-'}\n`;
+    const blob = new Blob([txt],{type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Refleksi_Pertemuan01.txt';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  },
+  clear(){ ['r1','r2','r3','r4'].forEach(id=>$('#'+id).value=''); State.data.refl={}; State.save(); $('#reflStatus').textContent='Dikosongkan.'; },
+  restore(){ const r=State.data.refl||{}; if(r.confBefore) $('#confBefore').value=r.confBefore; if(r.confAfter) $('#confAfter').value=r.confAfter;
+    ['r1','r2','r3','r4'].forEach(id=>{ if(r[id]) $('#'+id).value=r[id]; }); this.update(); }
+};
+
+/* =====================================================================
+   8. LECTURER CONTROL
+   ===================================================================== */
+Lecturer = {
+  build(){
+    const box = $('#lecList'); box.innerHTML='';
+    SESSIONS.forEach((s,i)=>{
+      const done = !!State.data.lec[i];
+      const row = el('div','lec-row'+(done?' fin':''),
+        `<input type="checkbox" ${done?'checked':''}>
+         <span class="nm">${s.n}</span>
+         <span class="du">${s.d} min</span>
+         <button class="btn sm" title="Jalankan timer sesi">▶</button>
+         <button class="btn sm" title="Buka sesi">→</button>`);
+      row.querySelector('input').onchange = (e)=>{ State.data.lec[i]=e.target.checked; row.classList.toggle('fin',e.target.checked); State.save(); };
+      const btns = row.querySelectorAll('button');
+      btns[0].onclick = ()=>{ Timer.set(s.d); Timer.start(); go(s.sec); closeDrawer(); };
+      btns[1].onclick = ()=>{ go(s.sec); closeDrawer(); };
+      box.appendChild(row);
+    });
+    const sum = SESSIONS.reduce((a,b)=>a+b.d,0);
+    $('#lecTotal').textContent = '240 minutes  (rincian '+sum+' min)';
+  },
+  snapshot(){
+    const pct = Math.round(State.data.visited.length / SECTIONS.length * 100);
+    $('#lecProg').textContent = pct+'%';
+    const g = k => { const a=State.data.quiz[k]||{}; const keys=Object.keys(a);
+      if(!keys.length) return '—'; let c=0; keys.forEach(i=>{ if(a[i]===QUIZZES[k].q[i].a) c++; }); return c+'/'+QUIZZES[k].q.length; };
+    $('#lecMat').textContent = g('mat'); $('#lecK3').textContent = g('k3'); $('#lecComp').textContent = g('comp');
+    const sc = Object.keys(State.data.scen||{}).length;
+    let scn=0; SCENARIOS.forEach((x,i)=>{ if(State.data.scen[i]===x.good) scn++; });
+    $('#lecScn').textContent = sc ? scn+'/'+SCENARIOS.length : '—';
+  },
+  uncheckAll(){ State.data.lec=[]; State.save(); this.build(); },
+  print(){ window.print(); }
+};
+function openDrawer(){ $('#drawer').classList.add('open'); $('#overlay').classList.add('show'); }
+function closeDrawer(){ $('#drawer').classList.remove('open'); $('#overlay').classList.remove('show'); }
+
+/* =====================================================================
+   9. NAVIGATION / APP
+   ===================================================================== */
+let current = 'overview';
+function go(id){
+  const idx = SECTIONS.findIndex(s=>s.id===id);
+  if(idx<0) return;
+  current = id;
+  $$('.section').forEach(s=>s.classList.remove('active'));
+  $('#sec-'+id).classList.add('active');
+  $$('.nav-item').forEach(n=>n.classList.remove('active'));
+  const nav = document.querySelector('.nav-item[data-id="'+id+'"]');
+  if(nav) nav.classList.add('active');
+  const s = SECTIONS[idx];
+  $('#tbTitle').textContent = s.label;
+  $('#tbSub').textContent = $('#sec-'+id).dataset.sub || 'Bengkel Elektronika — Pertemuan 01';
+  if(!State.data.visited.includes(id)){ State.data.visited.push(id); State.save(); }
+  $$('.nav-item').forEach(n=>n.classList.toggle('done', State.data.visited.includes(n.dataset.id)));
+  const pct = State.data.visited.length / SECTIONS.length * 100;
+  $('#pbar').style.width = pct+'%';
+  $('#btnPrev').disabled = idx===0;
+  $('#btnNext').disabled = idx===SECTIONS.length-1;
+  window.scrollTo({top:0, behavior:'smooth'});
+  Lecturer.snapshot();
+}
+function nav(dir){
+  const idx = SECTIONS.findIndex(s=>s.id===current);
+  const n = idx + dir;
+  if(n>=0 && n<SECTIONS.length) go(SECTIONS[n].id);
+}
+function toggleAnswers(){
+  const sec = $('#sec-'+current);
+  const fbs = Array.from(sec.querySelectorAll('.fb'));
+  if(!fbs.length) return;
+  const anyShown = fbs.some(f=>f.classList.contains('show'));
+  fbs.forEach(f=>f.classList.toggle('show', !anyShown));
+}
+App = {
+  reset(){
+    if(!confirm('Reset semua progress mahasiswa di browser ini? (checklist, skor kuis, refleksi)')) return;
+    State.data = { visited:[], checks:{}, quiz:{}, scen:{}, lec:[], refl:{} };
+    State.save(); location.reload();
+  }
+};
+
+/* =====================================================================
+   10. INIT
+   ===================================================================== */
+function init(){
+  State.load();
+  buildMenu();
+  buildRoadmap();
+  buildContract();
+  buildK3();
+  buildComponents();
+  buildBands();
+  buildWorkflow();
+  buildScenarios();
+  buildQuiz('mat'); buildQuiz('k3'); buildQuiz('comp');
+  Lecturer.build();
+
+  const lo = $('#loBody');
+  LO.forEach(r=>lo.appendChild(el('tr','',`<td><b>${r[0]}</b></td><td>${r[1]}</td><td><span class="badge">${r[2]}</span></td>`)));
+
+  // events
+  $('#btnPrev').onclick = ()=>nav(-1);
+  $('#btnNext').onclick = ()=>nav(1);
+  $('#btnTimer').onclick = ()=>Timer.toggle();
+  $('#btnTimerReset').onclick = ()=>Timer.set(30);
+  $('#btnProjector').onclick = function(){ document.body.classList.toggle('projector'); this.textContent = document.body.classList.contains('projector')?'Normal':'Projector'; };
+  $('#btnReset').onclick = ()=>App.reset();
+  $('#fabLec').onclick = openDrawer;
+  $('#btnCloseDrawer').onclick = closeDrawer;
+  $('#overlay').onclick = closeDrawer;
+  ['ledVs','ledVf','ledIf'].forEach(id=>$('#'+id).addEventListener('input', calcLed));
+  calcLed();
+  Refl.restore();
+  Lecturer.snapshot();
+
+  document.addEventListener('keydown', e=>{
+    const tag = (e.target.tagName||'').toLowerCase();
+    if(tag==='input'||tag==='textarea'||tag==='select') return;
+    if(e.key==='ArrowRight'){ e.preventDefault(); nav(1); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); nav(-1); }
+    else if(e.key===' '||e.code==='Space'){ e.preventDefault(); toggleAnswers(); }
+    else if(e.key==='Escape'){ closeDrawer(); }
+  });
+
+  go(State.data.visited.length ? State.data.visited[State.data.visited.length-1] : 'overview');
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
